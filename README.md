@@ -23,7 +23,7 @@ Follow these steps to set up Aspira locally:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/Aspira.git
+   git clone https://github.com/yassirkalkhi/Aspira.git
    cd Aspira
 
 2. **Install dependencies**:
