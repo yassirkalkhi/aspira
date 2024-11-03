@@ -27,12 +27,12 @@ Follow these steps to set up Aspira locally:
    cd Aspira
 
 2. **Install dependencies**:
-   ```bash
- npm install
+   ```bash npm install
+
  
 3. **Run the application**:
-   ```bash
-npm start
+   ```bash npm start
+
 
 
  
