@@ -25,3 +25,35 @@ Follow these steps to set up Aspira locally:
    ```bash
    git clone https://github.com/YOUR_USERNAME/Aspira.git
    cd Aspira
+
+2. **Install dependencies**:
+   ```bash
+ npm install
+ 
+3. **Run the application**:
+   ```bash
+npm start
+
+
+ 
+🛠 Technologies
+Aspira is built using the following technologies:
+
+React - A powerful library for building UIs
+React Router - For seamless navigation between pages
+Lucide Icons - A stylish icon set for modern design
+Tailwind CSS - Utility-first CSS framework for responsive styling
+
+
+📝 Contributing
+Contributions are welcome! Here’s how to get started:
+
+Fork the repository.
+Create a new branch (git checkout -b feature/your-feature).
+Commit your changes (git commit -m 'Add feature').
+Push to the branch (git push origin feature/your-feature).
+Open a pull request.
+📄 License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+
