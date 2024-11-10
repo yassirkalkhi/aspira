@@ -3,6 +3,7 @@ import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './Header/Header';
 import BottomNav from './components/ui/BottomNav';
+import { Toaster } from 'react-hot-toast';
 
 // Lazy load components
 const Home = lazy(() => import('./pages/Home'));
@@ -16,7 +17,7 @@ const Jobs = lazy(() => import('./pages/Jobs'));
 // Custom loader component
 const Loader = () => (
   <div className="loader-container">
-    <div className="loader"></div>
+    <div className="loader">Loading ...</div>
   </div>
 );
 
@@ -29,16 +30,17 @@ function App() {
   }, []);
 
   return (
-
+    <>
+      <Toaster />
       <BrowserRouter>
-        <div className="min-h-screen pb-16 md:pb-0">
+        <div className="min-h-screen pb-16 md:pb-0 app ">
           <Header />
-          <main className="pt-16">
+          <main className="pt-16 app">
             <Suspense fallback={<Loader />}>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/profile" element={<Profile />} />
+                <Route path="/:username" element={<Profile />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/events" element={<Events />} />
@@ -49,7 +51,7 @@ function App() {
           <BottomNav />
         </div>
       </BrowserRouter>
-
+    </>
   );
 }
 

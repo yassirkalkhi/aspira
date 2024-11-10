@@ -58,43 +58,42 @@ const Jobs = () => {
     setDatePosted('');
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#18181A] p-4 sm:p-6 lg:p-8">
+  return ( 
+    <div className="lg:h-[93.5vh] w-full bg-gray-50 dark:bg-dark-secondary p-4 sm:p-6 lg:p-8 lg:fixed">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Ready to Hire Section - Shows on mobile */}
+        {/* Ready to Hire Section - Mobile */}
         <div className="lg:hidden">
-          <div className="bg-white dark:bg-[#2F2F2F] rounded-lg shadow-sm">
+          <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm">
             <div className="p-6">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-[#c9d1d9] mb-2">
                 Ready to hire?
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-sm text-gray-600 dark:text-[#8b949e] mb-4">
                 Post your job to reach thousands of qualified candidates.
               </p>
               <button
                 onClick={() => setIsPostJobModalOpen(true)}
-                className="w-full bg-black dark:bg-white text-white dark:text-black 
-                         py-3 rounded-lg hover:bg-black/90 dark:hover:bg-white/90
-                         transition-all duration-200 font-medium"
+                className="w-full bg-theme-primary  hover:bg-opacity-80 text-white
+                         py-3 rounded-lg transition-all duration-200 font-medium"
               >
                 Post a Job
               </button>
             </div>
             
             {/* Quick Stats */}
-            <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+            <div className="border-t border-gray-200 dark:border-[#21262d] px-6 py-4">
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">5k+</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Active Users</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-[#c9d1d9]">5k+</div>
+                  <div className="text-xs text-gray-500 dark:text-[#8b949e]">Active Users</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">24h</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Avg. Response</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-[#c9d1d9]">24h</div>
+                  <div className="text-xs text-gray-500 dark:text-[#8b949e]">Avg. Response</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">98%</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Success Rate</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-[#c9d1d9]">98%</div>
+                  <div className="text-xs text-gray-500 dark:text-[#8b949e]">Success Rate</div>
                 </div>
               </div>
             </div>
@@ -105,12 +104,12 @@ const Jobs = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Job List Section */}
           <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-[#2F2F2F] rounded-lg shadow-sm p-4 mb-6">
+            <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm p-4 mb-6">
               <div className="flex flex-col sm:flex-row gap-4 mb-4">
                 {/* Job Search Input */}
                 <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-                    <Search className="h-5 w-5 text-gray-400" />
+                    <Search className="h-5 w-5 text-[#8b949e]" />
                   </div>
                   <input
                     type="text"
@@ -118,10 +117,11 @@ const Jobs = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-3 py-2 
-                             border border-gray-200 dark:border-gray-700 
-                             rounded-lg focus:outline-none
-                             text-gray-900 dark:text-gray-100
-                             placeholder-gray-400"
+                             border border-gray-200 dark:border-[#30363d] 
+                             rounded-lg focus:outline-none 
+                             bg-white dark:bg-dark-secondary
+                             text-gray-900 dark:text-[#c9d1d9]
+                             placeholder-gray-400 dark:placeholder-[#8b949e]"
                   />
                 </div>
 
@@ -136,16 +136,17 @@ const Jobs = () => {
                     value={locationQuery}
                     onChange={(e) => setLocationQuery(e.target.value)}
                     className="w-full pl-10 pr-3 py-2 
-                             border border-gray-200 dark:border-gray-700 
+                             border border-gray-200 dark:border-gray-600 
                              rounded-lg focus:outline-none
+                             bg-white dark:bg-dark-secondary
                              text-gray-900 dark:text-gray-100
-                             placeholder-gray-400"
+                             placeholder-gray-400 dark:placeholder-gray-500"
                   />
                 </div>
               </div>
 
               {/* Filters Section */}
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="pt-4 border-t border-gray-200 dark:border-[#21262d]">
                 <div className="flex flex-wrap gap-4">
                   {/* Job Type Filter */}
                   <div className="flex-1 min-w-[200px]">
@@ -153,8 +154,10 @@ const Jobs = () => {
                       Job Type
                     </label>
                     <select
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
-                               bg-white dark:bg-[#2F2F2F] text-gray-900 dark:text-gray-100
+                      className="w-full px-3 py-2 rounded-lg 
+                               border border-gray-200 dark:border-gray-600 
+                               bg-white dark:bg-dark-secondary
+                               text-gray-900 dark:text-gray-100
                                focus:outline-none"
                       value={jobType}
                       onChange={(e) => setJobType(e.target.value)}
@@ -173,8 +176,10 @@ const Jobs = () => {
                       Salary Range
                     </label>
                     <select
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
-                               bg-white dark:bg-[#2F2F2F] text-gray-900 dark:text-gray-100
+                      className="w-full px-3 py-2 rounded-lg 
+                               border border-gray-200 dark:border-gray-600 
+                               bg-white dark:bg-dark-secondary
+                               text-gray-900 dark:text-gray-100
                                focus:outline-none"
                       value={salaryRange}
                       onChange={(e) => setSalaryRange(e.target.value)}
@@ -193,13 +198,15 @@ const Jobs = () => {
                       Date Posted
                     </label>
                     <select
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
-                               bg-white dark:bg-[#2F2F2F] text-gray-900 dark:text-gray-100
+                      className="w-full px-3 py-2 rounded-lg 
+                               border border-gray-200 dark:border-gray-600 
+                               bg-white dark:bg-dark-secondary
+                               text-gray-900 dark:text-gray-100
                                focus:outline-none"
                       value={datePosted}
                       onChange={(e) => setDatePosted(e.target.value)}
                     >
-                      <option value="">Any Time</option>
+                      <option value="" >Any Time</option>
                       <option value="24h">Last 24 hours</option>
                       <option value="7d">Last 7 days</option>
                       <option value="30d">Last 30 days</option>
@@ -214,7 +221,8 @@ const Jobs = () => {
                     <>
                       {jobType && (
                         <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full 
-                                             bg-gray-100 dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300">
+                                             bg-gray-100 dark:bg-dark-secondary text-sm 
+                                             text-gray-700 dark:text-[#c9d1d9]">
                           {jobType}
                           <button
                             onClick={() => setJobType('')}
@@ -226,7 +234,8 @@ const Jobs = () => {
                       )}
                       {salaryRange && (
                         <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full 
-                                             bg-gray-100 dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300">
+                                             bg-gray-100 dark:bg-dark-secondary text-sm 
+                                             text-gray-700 dark:text-[#c9d1d9]">
                           {salaryRange}
                           <button
                             onClick={() => setSalaryRange('')}
@@ -238,7 +247,8 @@ const Jobs = () => {
                       )}
                       {datePosted && (
                         <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full 
-                                             bg-gray-100 dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300">
+                                             bg-gray-100 dark:bg-dark-secondary text-sm 
+                                             text-gray-700 dark:text-[#c9d1d9]">
                           {datePosted}
                           <button
                             onClick={() => setDatePosted('')}
@@ -261,7 +271,7 @@ const Jobs = () => {
             </div>
 
             {/* Job Cards */}
-            <div className="space-y-6">
+            <div className="space-y-6 overflow-y-scroll app h-[39%] ">
               {filteredJobs.map(job => (
                 <JobCard
                   key={job.id}
@@ -270,56 +280,47 @@ const Jobs = () => {
                   onToggle={toggleJobExpansion}
                 />
               ))}
+             <div className='h-96'>
+             </div>
+              <div className='h-96'>
+              </div>
             </div>
           </div>
 
           {/* Sticky Sidebar - Hidden on mobile */}
           <div className="hidden lg:block sticky top-6 h-fit">
             {/* Ready to Hire Section - Shows on desktop */}
-            <div className="bg-white dark:bg-[#2F2F2F] rounded-lg shadow-sm">
+            <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm">
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-[#c9d1d9] mb-2">
                   Ready to hire?
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <p className="text-sm text-gray-600 dark:text-[#8b949e] mb-4">
                   Post your job to reach thousands of qualified candidates.
                 </p>
                 <button
                   onClick={() => setIsPostJobModalOpen(true)}
-                  className="w-full bg-black dark:bg-white text-white dark:text-black 
-                           py-3 rounded-lg hover:bg-black/90 dark:hover:bg-white/90
-                           transition-all duration-200 font-medium"
+                  className="w-full  bg-theme-primary hover:bg-opacity-80   text-white
+                           py-3 rounded-lg transition-all duration-200 font-medium"
                 >
                   Post a Job
                 </button>
               </div>
               
               {/* Quick Stats */}
-              <div className="border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+              <div className="border-t border-gray-200 dark:border-[#21262d] px-6 py-4">
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                      5k+
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      Active Users
-                    </div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-[#c9d1d9]">5k+</div>
+                    <div className="text-xs text-gray-500 dark:text-[#8b949e]">Active Users</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                      24h
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      Avg. Response
-                    </div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-[#c9d1d9]">24h</div>
+                    <div className="text-xs text-gray-500 dark:text-[#8b949e]">Avg. Response</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                      98%
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      Success Rate
-                    </div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-[#c9d1d9]">98%</div>
+                    <div className="text-xs text-gray-500 dark:text-[#8b949e]">Success Rate</div>
                   </div>
                 </div>
               </div>
@@ -366,21 +367,21 @@ const JobCard = ({ job, isExpanded, onToggle }) => {
   const formattedDate = getFormattedDate(job.postedAt);
   
   return (
-    <div className="bg-white dark:bg-[#2F2F2F] rounded-lg shadow-sm space-y-1">
+    <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm space-y-1">
       {/* Main Job Card - Clickable Header */}
       <div 
         onClick={() => onToggle(job.id)}
-        className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 
+        className="p-4 cursor-pointer  hover:bg-theme-primary/20 rounded-lg
                  transition-colors duration-200"
       >
         <div className="flex gap-4">
-          <div className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800 
+          <div className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-white 
                        flex items-center justify-center shrink-0 overflow-hidden">
             {job.logo ? (
               <img 
                 src={job.logo} 
                 alt={`${job.company} logo`}
-                className="h-8 w-8 object-contain"
+                className="h-8 w-8 object-contain dark:bg-white"
               />
             ) : (
               <Briefcase className="h-6 w-6 text-gray-500" />
@@ -412,25 +413,27 @@ const JobCard = ({ job, isExpanded, onToggle }) => {
             <div className="mt-2 flex flex-wrap gap-2">
               {/* Location, Type, Salary badges */}
               <div className="flex flex-wrap gap-1.5">
-                <span className="inline-flex text-xs px-2 py-1 rounded-full bg-gray-100 
-                      dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                <span className="inline-flex text-xs px-2 py-1 rounded-full 
+                      bg-gray-100 dark:bg-dark-secondary
+                      text-gray-600 dark:text-white/50">
                   {job.location}
                 </span>
-                <span className="inline-flex text-xs px-2 py-1 rounded-full bg-gray-100 
-                      dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                <span className="inline-flex text-xs px-2 py-1 rounded-full 
+                      bg-gray-100 dark:bg-dark-secondary
+                      text-gray-600 dark:text-white/50">
                   {job.type}
                 </span>
-                <span className="inline-flex text-xs px-2 py-1 rounded-full bg-gray-100 
-                      dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                <span className="inline-flex text-xs px-2 py-1 rounded-full 
+                      bg-gray-100 dark:bg-dark-secondary
+                      text-gray-600 dark:text-white/50">
                   {job.salary}
                 </span>
               </div>
               {/* Time badge */}
-              <span className="inline-flex items-center text-xs px-2 py-1 rounded-full 
-                    bg-gray-900/80 dark:bg-gray-800
-                    text-white dark:text-gray-200
-                    gap-1">
-                <Clock className="h-3 w-3" />
+              <span className="flex items-center gap-1 text-xs px-2 py-1 rounded-full 
+                      bg-theme-primary text-white dark:bg-dark-secondary
+                      dark:text-white/50">
+                <Clock className="h-3 w-3 " /> 
                 {timeAgo}
               </span>
             </div>
@@ -446,31 +449,31 @@ const JobCard = ({ job, isExpanded, onToggle }) => {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden border-t dark:border-gray-700"
+            className="overflow-hidden"
           >
             <div className="p-4 space-y-4">
               {/* Updated Job Details with black badges */}
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 
-                              bg-gray-900 dark:bg-gray-800 
-                              text-white dark:text-gray-200 
+                            bg-theme-primary dark:bg-dark-secondary
+                            text-white dark:text-white/50
                               rounded-full">
                   <Calendar className="h-3.5 w-3.5" />
                   Posted: {formattedDate}
                 </span>
                 {job.expiresAt && isValid(new Date(job.expiresAt)) && (
                   <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 
-                                bg-gray-900 dark:bg-gray-800 
-                                text-white dark:text-gray-200 
+                               bg-theme-primary dark:bg-dark-secondary
+                               text-white dark:text-white/50
                                 rounded-full">
                     <Clock className="h-3.5 w-3.5" />
                     Expires: {getFormattedDate(job.expiresAt)}
                   </span>
                 )}
                 <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 
-                              bg-gray-900 dark:bg-gray-800 
-                              text-white dark:text-gray-200 
-                              rounded-full">
+                            bg-theme-primary dark:bg-dark-secondary
+                            text-white dark:text-white/50
+                               rounded-full">
                   <Users className="h-3.5 w-3.5" />
                   {job.applicants || 0} applicants
                 </span>
@@ -510,15 +513,15 @@ const JobCard = ({ job, isExpanded, onToggle }) => {
 
               {/* Action Buttons */}
               <div className="flex gap-3">
-                <button className="flex-1 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 
-                       px-4 py-2 rounded-lg hover:opacity-90 transition-opacity
-                       flex items-center justify-center gap-2">
+                <button className="flex-1 bg-theme-primary  hover:opacity-90 text-white 
+                               px-4 py-2 rounded-lg transition-opacity
+                               flex items-center justify-center gap-2">
                   <Send className="h-4 w-4" />
                   Apply Now
                 </button>
-                <button className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700
-                       text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800
-                       flex items-center justify-center gap-2">
+                <button className="px-4 py-2 rounded-lg border border-gray-200 dark:border-dark-primary
+                               text-gray-700 dark:text-white/80 hover:dark:bg-dark-secondary hover:bg-theme-primary/20 
+                               flex items-center justify-center gap-2">
                   <BookmarkPlus className="h-4 w-4" />
                   Save
                 </button>

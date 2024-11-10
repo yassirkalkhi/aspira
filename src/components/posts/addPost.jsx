@@ -47,7 +47,7 @@ const AddPost = () => {
   ];
 
   return (
-    <div className="bg-white dark:bg-[#2F2F2F] rounded-lg shadow-sm">
+    <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm">
       {/* Main Input Area */}
       <div className="p-4">
         <div className="flex gap-3">
@@ -58,10 +58,11 @@ const AddPost = () => {
           />
           <button
             onClick={() => setIsExpanded(true)}
-            className={`flex-1 text-left px-4 py-3 rounded-full border border-gray-300 
-                     dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-[#18181A] 
-                     text-gray-500 dark:text-gray-400 transition-colors
-                     ${isExpanded ? 'bg-gray-100 dark:bg-[#18181A]' : ''}`}
+            className={`flex-1 text-left px-4 py-3 rounded-full border 
+                     border-gray-300 dark:border-dark-secondary 
+                     hover:bg-gray-100 dark:hover:bg-dark-secondary 
+                     text-gray-500 dark:text-white/50 transition-colors
+                     ${isExpanded ? 'bg-gray-100 dark:bg-dark-secondary' : ''}`}
           >
             Start a post
           </button>
@@ -75,9 +76,10 @@ const AddPost = () => {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="What do you want to talk about?"
-              className="w-full bg-transparent resize-none outline-none text-gray-700 
-                     dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400
-                     min-h-[120px]"
+              className="w-full bg-transparent resize-none outline-none 
+                       text-gray-700 dark:text-[#c9d1d9] 
+                       placeholder-gray-500 dark:placeholder-[#8b949e]
+                       min-h-[120px]"
               rows={4}
             />
 
@@ -94,8 +96,9 @@ const AddPost = () => {
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 p-1 rounded-full bg-black/50 
-                             text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 p-1 rounded-full 
+                             bg-[#0d1117]/75 text-[#c9d1d9] 
+                             opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -107,8 +110,8 @@ const AddPost = () => {
         )}
       </div>
 
-      {/* Action Buttons - Fixed Footer with Black Icons */}
-      <div className="border-t dark:border-gray-700 px-4 py-2">
+      {/* Action Buttons */}
+      <div className="border-t dark:border-[#21262d] px-4 py-2">
         <div className="flex items-center justify-between">
           {/* Left side buttons */}
           <div className="flex items-center -ml-2">
@@ -129,10 +132,10 @@ const AddPost = () => {
                   type="button"
                   onClick={button.onClick}
                   className="inline-flex items-center p-2 rounded transition-colors gap-2
-                         hover:bg-gray-100 dark:hover:bg-gray-800 group"
+                         hover:bg-gray-100 dark:hover:bg-dark-secondary group"
                 >
-                  <Icon className="h-5 w-5 text-gray-900 dark:text-gray-100" />
-                  <span className="text-sm hidden sm:block text-gray-900 dark:text-gray-100">
+                  <Icon className="h-5 w-5 text-gray-900/60 dark:text-[#c9d1d9]" />
+                  <span className="text-sm hidden sm:block text-gray-900 dark:text-[#c9d1d9]">
                     {button.label}
                   </span>
                 </button>
@@ -149,17 +152,18 @@ const AddPost = () => {
                   setContent('');
                   setImages([]);
                 }}
-                className="px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-gray-100 
-                       hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
+                className="px-3 py-1.5 text-sm font-medium 
+                         text-gray-900 dark:text-[#c9d1d9] 
+                         hover:bg-gray-100 dark:hover:bg-dark-secondary 
+                         rounded transition-colors"
               >
                 Cancel
               </button>
               <button
                 disabled={!content.trim() && images.length === 0}
-                className="px-4 py-1.5 text-sm font-medium text-white bg-gray-900 
-                       dark:bg-gray-100 dark:text-gray-900
-                       rounded hover:bg-gray-800 dark:hover:bg-gray-200 
-                       disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-1.5 text-sm font-medium  bg-theme-primary text-white
+                         rounded disabled:opacity-50 
+                         transition-all"
               >
                 Post
               </button>

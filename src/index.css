@@ -25,4 +25,11 @@ body {
   transition-duration: 200ms;
 }
 
-
+.app{
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+.main{
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}

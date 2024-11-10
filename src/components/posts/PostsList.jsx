@@ -1,5 +1,5 @@
 import AddPost from './AddPost';
-import { Heart, MessageCircle, Share2, Repeat2, Building2, Users, Sparkles } from 'lucide-react';
+import {  Heart, ThumbsUp , MessageCircle, Share2, Repeat2, Building2, Users, Sparkles } from 'lucide-react';
 
 const PostsList = ({ posts }) => {
     const renderPostAlert = (source) => {
@@ -25,7 +25,7 @@ const PostsList = ({ posts }) => {
       
       return (
         <div className="flex items-center gap-2 py-2 px-4 text-xs text-gray-500 
-                     dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-t-lg">
+                     dark:text-[#8b949e] bg-gray-50 dark:bg-dark-secondary rounded-t-lg">
           <Icon className="h-3.5 w-3.5" />
           <span>{config.text}</span>
         </div>
@@ -37,8 +37,8 @@ const PostsList = ({ posts }) => {
         case 'video':
           return (
             <div className="mt-2">
-              <p className="mb-2 text-gray-700 dark:text-gray-300">{post.content}</p>
-              <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+              <p className="mb-2 text-gray-700 dark:text-[#c9d1d9]">{post.content}</p>
+              <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-[#21262d]">
                 <video
                   src={post.videoUrl}
                   controls
@@ -56,7 +56,7 @@ const PostsList = ({ posts }) => {
         case 'image':
           return (
             <div className="mt-2">
-              <p className="mb-2 text-gray-700 dark:text-gray-300">{post.content}</p>
+              <p className="mb-2 text-gray-700 dark:text-[#c9d1d9]">{post.content}</p>
               <img 
                 src={post.imageUrl} 
                 alt="Post content" 
@@ -66,7 +66,7 @@ const PostsList = ({ posts }) => {
           );
         default:
           return (
-            <p className="mt-2 text-gray-700 dark:text-gray-300">{post.content}</p>
+            <p className="mt-2 text-gray-700 dark:text-[#c9d1d9]">{post.content}</p>
           );
       }
     };
@@ -75,26 +75,29 @@ const PostsList = ({ posts }) => {
       if (author.isFollowing) return null;
       
       return (
-        <button className="text-xs font-medium px-3 py-1 rounded-full 
-                       border border-gray-200 dark:border-gray-700
-                       hover:bg-gray-100 dark:hover:bg-gray-800 
-                       text-gray-900 dark:text-gray-100
-                       transition-colors">
+        <button className="text-[0.6rem]  px-2 py-1 rounded-full 
+                      bg-theme-primary text-white/90">
           Follow
         </button>
       );
     };
+
+    const actionButtons = [
+      { label: 'Like', icon: ThumbsUp },
+      { label: 'Comment', icon: MessageCircle },
+      { label: 'Repost', icon: Repeat2 },
+      { label: 'Share', icon: Share2 },
+    ];
 
     return (
       <div className="space-y-6">
         <AddPost />
         {posts.map((post) => (
           <div key={post.id}>
-            {/* Source Alert at Top */}
             {renderPostAlert(post.source)}
-            
+              
             {/* Main Post Content */}
-            <div className="bg-white dark:bg-[#2F2F2F] rounded-b-lg shadow-sm p-4">
+            <div className="bg-white dark:bg-dark-primary rounded-b-lg shadow-sm p-4">
               {/* Author Info */}
               <div className="flex items-start gap-3 mb-4">
                 <img 
@@ -106,16 +109,16 @@ const PostsList = ({ posts }) => {
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-3">
-                        <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                        <h3 className="font-medium text-gray-900 dark:text-[#c9d1d9]">
                           {post.author.name}
                         </h3>
                         {renderFollowButton(post.author)}
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5">
+                      <p className="text-xs text-gray-500 dark:text-[#8b949e] line-clamp-1 mt-0.5">
                         {post.author.title}
                       </p>
                     </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">
+                    <span className="text-xs text-gray-500 dark:text-[#8b949e] shrink-0">
                       {post.timestamp}
                     </span>
                   </div>
@@ -129,47 +132,29 @@ const PostsList = ({ posts }) => {
 
               {/* Engagement Stats */}
               <div className="mt-4 flex items-center justify-between text-sm text-gray-500 
-                           dark:text-gray-400 pb-3 border-b dark:border-gray-700">
-                <span>{post.likes} likes</span>
+                           dark:text-[#8b949e] pb-3 border-b dark:border-[#21262d]">
+                <span className='flex items-center gap-1 '>  <ThumbsUp className="h-[10px] w-[10px] text-theme-primary" /> {post.likes} likes</span>
                 <div className="flex gap-4">
                   <span>{post.comments} comments</span>
-                  <span>{post.shares} shares</span>
+                  <span> {post.shares} shares</span>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-1 flex items-center justify-between">
-                <button className="flex items-center gap-2 px-4 py-2 rounded-lg 
-                               text-gray-900 dark:text-gray-100 hover:bg-gray-100 
-                               dark:hover:bg-[#18181A] transition-colors group">
-                  <Heart className="h-5 w-5 text-gray-500 group-hover:text-gray-900 
-                                dark:text-gray-400 dark:group-hover:text-gray-100" />
-                  <span className="text-sm font-medium">Like</span>
-                </button>
-
-                <button className="flex items-center gap-2 px-4 py-2 rounded-lg 
-                               text-gray-900 dark:text-gray-100 hover:bg-gray-100 
-                               dark:hover:bg-[#18181A] transition-colors group">
-                  <MessageCircle className="h-5 w-5 text-gray-500 group-hover:text-gray-900 
-                                        dark:text-gray-400 dark:group-hover:text-gray-100" />
-                  <span className="text-sm font-medium">Comment</span>
-                </button>
-
-                <button className="flex items-center gap-2 px-4 py-2 rounded-lg 
-                               text-gray-900 dark:text-gray-100 hover:bg-gray-100 
-                               dark:hover:bg-[#18181A] transition-colors group">
-                  <Repeat2 className="h-5 w-5 text-gray-500 group-hover:text-gray-900 
-                                  dark:text-gray-400 dark:group-hover:text-gray-100" />
-                  <span className="text-sm font-medium">Repost</span>
-                </button>
-
-                <button className="flex items-center gap-2 px-4 py-2 rounded-lg 
-                               text-gray-900 dark:text-gray-100 hover:bg-gray-100 
-                               dark:hover:bg-[#18181A] transition-colors group">
-                  <Share2 className="h-5 w-5 text-gray-500 group-hover:text-gray-900 
-                                 dark:text-gray-400 dark:group-hover:text-gray-100" />
-                  <span className="text-sm font-medium">Share</span>
-                </button>
+              <div className="mt-1 grid grid-cols-4 divide divide-dark-secondary ">
+                {actionButtons.map(({ label, icon: Icon }) => (
+                  <button
+                    key={label}
+                    className="flex items-center justify-center gap-2 px-2 py-2.5
+                             text-gray-500 dark:text-[#8b949e]
+                             hover:bg-gray-50 dark:hover:bg-dark-secondary rounded-lg 
+                             hover:text-gray-900 dark:hover:text-[#c9d1d9]
+                            "
+                  >
+                    <Icon className="h-5 w-5 transition-none" />
+                    <span className="text-sm font-medium">{label}</span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>

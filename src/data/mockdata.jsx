@@ -120,7 +120,7 @@ export const messages = [
     id: 1,
     user: {
       name: 'Sarah Wilson',
-      avatar: 'https://i.pravatar.cc/32?img=4',
+      avatar: 'https://i.pravatar.cc/32',
       isOnline: true,
       lastSeen: 'now'
     },
@@ -137,7 +137,7 @@ export const messages = [
     id: 2,
     user: {
       name: 'Alex Thompson',
-      avatar: 'https://i.pravatar.cc/32?img=5',
+      avatar: 'https://i.pravatar.cc/32',
       isOnline: true,
       lastSeen: '2m ago'
     },
@@ -152,7 +152,7 @@ export const messages = [
     id: 3,
     user: {
       name: 'Emily Davis',
-      avatar: 'https://i.pravatar.cc/32?img=6',
+      avatar: 'https://i.pravatar.cc/32',
       isOnline: false,
       lastSeen: '1h ago'
     },
@@ -372,3 +372,83 @@ export const jobs = [
     applicants: 41
   }
 ];
+export const projects = [
+  {
+    id: 1,
+    title: "Modern Social Platform",
+    description: "A full-stack social media platform built with React, Node.js, and MongoDB",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop",
+    technologies: ["React", "Node.js", "MongoDB", "Socket.io"],
+    githubUrl: "https://github.com/username/project",
+    liveUrl: "https://project-demo.com",
+    status: "Completed",
+    featured: true
+  },
+  {
+    id: 2,
+    title: "AI Image Generator",
+    description: "An AI-powered image generation tool using OpenAI's DALL-E API",
+    image: "https://images.unsplash.com/photo-1547954575-855750c57bd3?w=800&h=500&fit=crop",
+    technologies: ["Python", "Flask", "OpenAI", "React"],
+    githubUrl: "https://github.com/username/ai-project",
+    liveUrl: "https://ai-demo.com",
+    status: "In Progress",
+    featured: true
+  },
+  {
+    id: 3,
+    title: "E-commerce Dashboard",
+    description: "A comprehensive admin dashboard for e-commerce businesses",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=500&fit=crop",
+    technologies: ["Next.js", "TypeScript", "Prisma", "PostgreSQL"],
+    githubUrl: "https://github.com/username/dashboard",
+    liveUrl: "https://dashboard-demo.com",
+    status: "Completed",
+    featured: false
+  },
+  {
+    id: 4,
+    title: "Real-time Chat Application",
+    description: "End-to-end encrypted chat application with real-time messaging",
+    image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=500&fit=crop",
+    technologies: ["React Native", "Firebase", "WebRTC"],
+    githubUrl: "https://github.com/username/chat-app",
+    liveUrl: "https://chat-demo.com",
+    status: "In Progress",
+    featured: true
+  }
+];
+export const userData = {
+  id: "user-1", // Add this
+  name: "Alex Johnson",
+  avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+  cover: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1500&h=400&fit=crop",
+  bio: "Full-stack developer passionate about building great products",
+  position: "Senior Developer",
+  company: "Tech Corp",
+  location: "San Francisco, CA",
+  website: "alexjohnson.dev",
+  joinDate: "January 2022",
+  following: 234,
+  followers: 567,
+  about: "Experienced full-stack developer with a passion for building scalable applications...",
+  skills: ["React", "Node.js", "TypeScript", "Python", "AWS", "Docker", "GraphQL"],
+};
+
+// Add current user data (for auth)
+export const currentUser = {
+  id: "user-1", // Same ID for testing own profile
+  name: "Alex Johnson",
+  avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+  cover: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1500&h=400&fit=crop",
+  bio: "Full-stack developer passionate about building great products",
+  position: "Senior Developer",
+  company: "Tech Corp",
+  location: "San Francisco, CA",
+  website: "alexjohnson.dev",
+  joinDate: "January 2022",
+  following: 234,
+  followers: 567,
+  about: "Experienced full-stack developer with a passion for building scalable applications...",
+  skills: ["React", "Node.js", "TypeScript", "Python", "AWS", "Docker", "GraphQL"],
+};
