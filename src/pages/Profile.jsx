@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useUser } from '../Context/UserContext';
 import { useParams } from 'react-router-dom';
 import { userData } from '../data/mockdata';
 import { MapPin, Mail, Link as LinkIcon, Calendar, Edit, Plus, Briefcase, Heart, Share2, MessageCircle, Github, ExternalLink } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+
 
 const defaultImages = {
   avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
@@ -10,7 +12,7 @@ const defaultImages = {
 };
 
 const PostCard = ({ post }) => (
-  <div className="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6">
+  <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6">
     {post?.image && (
       <img 
         src={post.image} 
@@ -48,7 +50,7 @@ const PostCard = ({ post }) => (
 );
 
 const ProjectCard = ({ project }) => (
-  <div className="group bg-white dark:bg-[#1a1a1a] rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+  <div className="group bg-white dark:bg-dark-primary rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
     <div className="relative">
       <img 
         src={project?.image} 
@@ -78,7 +80,7 @@ const ProjectCard = ({ project }) => (
         )}
       </div>
       <div className="absolute top-2 right-2">
-        <span className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-[#242424] text-gray-600 dark:text-gray-300">
+        <span className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-theme-primary text-gray-600 dark:text-white/80">
           {project?.status}
         </span>
       </div>
@@ -92,7 +94,7 @@ const ProjectCard = ({ project }) => (
       </p>
       <div className="flex flex-wrap gap-2 mb-4">
         {project?.technologies?.map((tech, index) => (
-          <span key={index} className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-[#242424] text-gray-600 dark:text-gray-300">
+          <span key={index} className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-theme-primary text-gray-600 dark:text-white/80">
             {tech}
           </span>
         ))}
@@ -130,6 +132,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('posts');
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -169,7 +172,7 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#121212] flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-dark-primary flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
       </div>
     );
@@ -190,20 +193,20 @@ const Profile = () => {
   const tabs = [
     { id: 'posts', label: 'Posts', count: user.posts?.length },
     { id: 'projects', label: 'Projects', count: user.projects?.length },
-    { id: 'about', label: 'About' },
+    { id: 'about', label: 'More' },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#121212] p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-dark-secondary p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Profile Header */}
-        <div className="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
           {/* Cover Image */}
           <div 
             className="h-48 sm:h-64 w-full rounded-t-lg relative bg-cover bg-center"
             style={{ backgroundImage: `url(${coverImage})` }}
           >
-            <div className="absolute inset-0 bg-black/20 rounded-t-lg"></div>
+            <div className="absolute inset-0 bg-black/70 rounded-t-lg"></div>
             {isOwnProfile && (
               <button className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#242424] text-gray-700 dark:text-gray-300 absolute bottom-4 right-4 z-10">
                 <Edit className="h-4 w-4" />
@@ -235,7 +238,7 @@ const Profile = () => {
                       <Plus className="h-4 w-4" />
                       Follow
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#242424] text-gray-700 dark:text-gray-300">
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-dark-secondary text-gray-700 dark:text-gray-300">
                       <Mail className="h-4 w-4" />
                       Message
                     </button>
@@ -254,8 +257,7 @@ const Profile = () => {
                   </button>
                 </div>
               )}
-            </div>
-
+            </div> 
             {/* Profile Info */}
             <div className="space-y-4 pb-6">
               <div>
@@ -299,7 +301,7 @@ const Profile = () => {
         </div>
 
         {/* Tabs Navigation */}
-        <div className="border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-gray-50 dark:bg-[#121212] z-10 py-2">
+        <div className="border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-gray-50 dark:bg-dark-primary z-10 py-2 rounded-lg p-6">
           <nav className="flex gap-6">
             {tabs.map(tab => (
               <button
@@ -314,7 +316,7 @@ const Profile = () => {
                 <span className="flex items-center gap-2">
                   {tab.label}
                   {tab.count && (
-                    <span className="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-[#242424] text-gray-600 dark:text-gray-300">
+                    <span className="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-theme-primary text-gray-600 dark:text-white/80">
                       {tab.count}
                     </span>
                   )}
@@ -346,9 +348,9 @@ const Profile = () => {
           )}
 
           {activeTab === 'about' && (
-            <div className="bg-white dark:bg-[#1a1a1a] rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6">
               <h3 className="text-gray-900 dark:text-gray-100 font-semibold text-lg mb-4">
-                About
+                About 
               </h3>
               <div className="space-y-4">
                 <p className="text-gray-600 dark:text-gray-400">
@@ -360,7 +362,7 @@ const Profile = () => {
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {user.skills?.map((skill, index) => (
-                      <span key={index} className="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-[#242424] text-gray-600 dark:text-gray-300">
+                      <span key={index} className="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-theme-primary text-gray-600 dark:text-white/80">
                         {skill}
                       </span>
                     ))}

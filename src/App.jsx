@@ -4,8 +4,12 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './Header/Header';
 import BottomNav from './components/ui/BottomNav';
 import { Toaster } from 'react-hot-toast';
+import { UserProvider } from './Context/UserContext';
 
-// Lazy load components
+
+
+
+
 const Home = lazy(() => import('./pages/Home'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Profile = lazy(() => import('./pages/Profile'));
@@ -33,6 +37,7 @@ function App() {
     <>
       <Toaster />
       <BrowserRouter>
+      <UserProvider>
         <div className="min-h-screen pb-16 md:pb-0 app ">
           <Header />
           <main className="pt-16 app">
@@ -49,7 +54,8 @@ function App() {
             </Suspense>
           </main>
           <BottomNav />
-        </div>
+          </div>
+        </UserProvider>
       </BrowserRouter>
     </>
   );
