@@ -1,17 +1,17 @@
 'use client';
 import React, { useState } from 'react';
-import Header from '@/components/Navigation/Header';
 import MessagesList from '@/components/ui/MessagesList';
-import {popularJobs, posts} from '@/data/mockData'
+import {popularJobs, posts, trending} from '@/data/mockData'
 import PostsList from '@/components/ui/PostsList';
 import PopularJobs from '@/components/ui/PopularJobs';
 import Links from '@/components/ui/Links';
+import AddPost from '@/components/ui/AddPost';
+import TrendingTopics from '@/components/ui/Trending';
 
 export default function Home() {
   
   return (
     <>
-      <Header />
       <div className="w-[100vw] bg-gray-50 dark:bg-dark-secondary fixed ">
         <div className="max-w-7xl mx-auto px-4 overflow-hidden grid grid-cols-1 md:grid-cols-7 gap-6 h-screen">
           {/* Left Sidebar - Fixed */}
@@ -28,11 +28,12 @@ export default function Home() {
 
           {/* Main Content - Scrollable */}
           <div
-            className="md:col-span-3 h-screen overflow-y-auto py-6 px-1 main pb-24
+            className="md:col-span-3 h-screen overflow-y-auto py-6 px-1 main pt-20 pb-24
                       dark:text-[#c9d1d9]
                       scrollbar-thin scrollbar-thumb-[#8b949e] dark:scrollbar-thumb-[#30363d]
                       scrollbar-track-transparent noScrollBar" 
           >
+            <AddPost/>
             <PostsList  />
           </div>
 
@@ -44,6 +45,7 @@ export default function Home() {
           >
             <div className="py-6 space-y-6">
               <MessagesList />
+              <TrendingTopics topics={trending} />
             </div>
           </div>
         </div>

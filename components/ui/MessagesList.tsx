@@ -60,7 +60,7 @@ const MessagesList = () => {
           <MessageSquare className="h-5 w-5" />
         </Link>
       </div>
-      {!user && <p className="text-gray-500 dark:text-gray-400">Sign in to view messages.</p>}
+      {!user.uid && <p className="text-gray-500 dark:text-gray-400">Sign in to view messages.</p>}
       {messagesLoading && <p className="text-gray-500 dark:text-gray-400">Loading messages...</p>}
       {messagesError && <p className="text-red-500">Error Getting messages !</p>}
       {messages.length === 0 && !messagesLoading && (

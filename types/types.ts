@@ -1,3 +1,20 @@
+import { Timestamp } from "firebase/firestore";
+
+export interface User {
+    uid : string,
+    AvatarURL : string,
+    createdAt : Timestamp,
+    email : string,
+    firstName : string,
+    isOnline : boolean,
+    lastName : string,
+    role : string ,
+    username : string
+}
+
+
+
+
 export interface Message {
     id: number;
     user: {
@@ -18,7 +35,6 @@ export interface Message {
 
 export interface Post{
         id: string,
-        type: string,
         source: string,
         author: {
           name: string,
@@ -26,12 +42,29 @@ export interface Post{
           title:string,
         },
         content: string,
-        mediaURL? : string | null,
+        medias? : {url : string , type : string}[] | null,
         timestamp:string,
         likes: string,
         comments: string ,
         shares: string,
       }
+export interface Job {
+    id: number,
+    title: string,
+    company: string,
+    logo: string,
+    location: string,
+    type:string,
+    salary: number,
+    isRemote: boolean,
+    level: string,
+    description: string,
+    requirements: string[],
+    companyDescription : string,
+    postedAt:Timestamp,
+    expiresAt: string,
+    applicants: number
+}
 
 export interface PopularJob {
         id: number,
@@ -41,4 +74,11 @@ export interface PopularJob {
         location: string,
         salary: string
       
+}
+export interface Trending{
+  id: number,
+  tag: string,
+  posts: number,
+  category: string,
+  trending: boolean
 }
