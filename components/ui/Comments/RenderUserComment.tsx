@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { User } from "@/types/types";
 import { doc, getDoc } from "firebase/firestore";
-import { Skeleton } from "@/components/ui/skeleton"; // Import a skeleton loader for better UX
+import { Skeleton } from "@/components/ui/shadcn/ui/skeleton"; // Import a skeleton loader for better UX
 import React from "react";
 
 interface RenderUserCommentProps {

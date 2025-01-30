@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase'; // Adjust the path to your Firebase config
 import { collection, getDocs, addDoc, Timestamp } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Job } from '@/types/types';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/components/ui/shadcn/ui/skeleton';
 import PostJobSection from '@/components/ui/Jobs/PostJobModal';
 
 const Jobs = () => {

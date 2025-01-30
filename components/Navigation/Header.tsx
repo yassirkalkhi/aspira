@@ -9,7 +9,7 @@ import {
 import  Link  from 'next/link';
 import ProfileDropdown from '@/components/Dropdowns/profileDropdown';
 import NotificationsDropdown from '@/components/Dropdowns/notificationsDropdown';
-import Button from '../ui/Button';
+import Button from '../ui/shadcn/ui/Button';
 
 const Header = () => {
   const user = {

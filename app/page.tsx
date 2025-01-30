@@ -1,12 +1,12 @@
 'use client';
 import React, { useState } from 'react';
-import MessagesList from '@/components/ui/MessagesList';
+import MessagesList from '@/components/ui/Messages/MessagesList';
 import {popularJobs, posts, trending} from '@/data/mockData'
-import PostsList from '@/components/ui/PostsList';
-import PopularJobs from '@/components/ui/PopularJobs';
-import Links from '@/components/ui/Links';
-import AddPost from '@/components/ui/AddPost';
-import TrendingTopics from '@/components/ui/Trending';
+import PostsList from '@/components/ui/Posts/PostsList';
+import PopularJobs from '@/components/ui/Jobs/PopularJobs';
+import Links from '@/components/ui/Links/Links';
+import AddPost from '@/components/ui/Posts/AddPost';
+import TrendingTopics from '@/components/ui/Jobs/Trending';
 
 export default function Home() {
   

@@ -16,27 +16,18 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import Button from './Button';
-import { User } from '@/types/types';
-import { StyledString } from 'next/dist/build/swc/types';
-import RenderUserComment from './RenderUserComment';
+import Button from '@/components/ui/shadcn/ui/Button';
+import RenderUserComment from '@/components/ui/Comments/RenderUserComment';
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import {ScrollArea} from '@/components/ui/scroll-area'
-import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/shadcn/ui/dialog';
+import {ScrollArea} from '@/components/ui/shadcn/ui/scroll-area'
+import { Input } from '@/components/ui/shadcn/ui/input';
+import { Comment } from '@/types/types';
 
 interface PostStats {
   likes: number;
   comments: number;
   shares: number;
-}
-
-interface Comment {
-  id: string;
-  postId: string;
-  userId: string;
-  content: string;
-  createdAt: Date;
 }
 
 interface PostActionsProps {
@@ -101,7 +92,7 @@ const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
             id: doc.id,
             ...doc.data(),
             createdAt: doc.data().createdAt?.toDate() || new Date()
-          })) as Comment[];
+          })) as Comment  [];
           
           setComments(commentsData);
           setError('');
