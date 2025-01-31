@@ -1,21 +1,22 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import JobCard from '@/components/ui/Jobs/JobCard';
-import { Search, MapPin, X } from 'lucide-react';
-import { db } from '@/lib/firebase'; // Adjust the path to your Firebase config
-import { collection, getDocs, addDoc, Timestamp } from 'firebase/firestore';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Search, MapPin} from 'lucide-react';
+import { db } from '@/lib/firebase';
+import { collection, getDocs } from 'firebase/firestore';
 import { Job } from '@/types/types';
 import { Skeleton } from '@/components/ui/shadcn/ui/skeleton';
 import PostJobSection from '@/components/ui/Jobs/PostJobModal';
+import ApplyModal from '@/components/ui/Jobs/ApplyModal';
+import MessagesList from '@/components/ui/Messages/MessagesList';
 
 const Jobs = () => {
     const user = {
         uid: "id1",
         photoURL: "https://example.com/photo.jpg" 
     }; 
-    const [searchQuery, setSearchQuery] = useState('');
-    const [locationQuery, setLocationQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [locationQuery, setLocationQuery] = useState<string>('');
     const [jobs, setJobs] = useState<Job[]>([]);
     const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -26,9 +27,6 @@ const Jobs = () => {
     const [error, setError] = useState<string | null>(null);
     const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
     const [currentJobId, setCurrentJobId] = useState<string | null>(null);
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [motivationLetter, setMotivationLetter] = useState('');
 
     // Fetch jobs from Firestore
     const fetchJobs = async () => {
@@ -36,12 +34,23 @@ const Jobs = () => {
         try {
             const jobsCollection = collection(db, 'jobs');
             const jobsSnapshot = await getDocs(jobsCollection);
-            const jobs = jobsSnapshot.docs.map(doc => ({ 
-                id: doc.id.toString(), 
-                ...doc.data(),
-                postedAt: doc.data().postedAt.toDate() // Convert Firestore Timestamp to Date
-            } as unknown as Job));
-            console.log(jobs)
+            const jobs = jobsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                title: doc.data().title,
+                company: doc.data().company,
+                logo: doc.data().logo,
+                location: doc.data().location,
+                type: doc.data().type,
+                salary: doc.data().salary,
+                isRemote: doc.data().isRemote,
+                level: doc.data().level,
+                description: doc.data().description,
+                requirements: doc.data().requirements,
+                companyDescription: doc.data().companyDescription,
+                postedAt: doc.data().postedAt.toDate(), // Convert Firestore Timestamp to Date
+                expiresAt: doc.data().expiresAt,
+                applicants: doc.data().applicants
+            } as unknown  as Job));
             setJobs(jobs);
             setFilteredJobs(jobs);
             handleSearch(jobs); 
@@ -65,14 +74,11 @@ const Jobs = () => {
                 const matchesSearch = !searchQuery || 
                     job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     job.company.toLowerCase().includes(searchQuery.toLowerCase());
-                
                 const matchesLocation = !locationQuery ||
                     job.location.toLowerCase().includes(locationQuery.toLowerCase());
-
                 const matchesJobType = !jobType || job.type === jobType;
                 const matchesSalaryRange = !salaryRange || checkSalaryRange(job.salary, salaryRange);
-                const matchesDatePosted = !datePosted || checkDatePosted(job.postedAt.toDate(), datePosted);
-
+                const matchesDatePosted = !datePosted || checkDatePosted(job.postedAt.toString(), datePosted);
                 return matchesSearch && matchesLocation && matchesJobType && matchesSalaryRange && matchesDatePosted;
             });
 
@@ -86,10 +92,10 @@ const Jobs = () => {
         return salary >= min && salary <= max;
     };
 
-    const checkDatePosted = (postedAt: Date, dateFilter: string) => {
+    const checkDatePosted = (postedAt: string, dateFilter: string) => {
         const currentDate = new Date();
-        const timeDiff = currentDate.getTime() - postedAt.getTime();
-
+        const datePosted = new Date(postedAt);
+        const timeDiff = currentDate.getTime() - datePosted.getTime();
         switch (dateFilter) {
             case '24h':
                 return timeDiff <= 24 * 60 * 60 * 1000;
@@ -108,37 +114,7 @@ const Jobs = () => {
         handleSearch();
     }, [searchQuery, locationQuery, jobType, salaryRange, datePosted]);
 
-    // Handle job application
-    const handleApply = async () => {
-        if (!user || !currentJobId) {
-            setError('You must be logged in to apply for a job.');
-            return;
-        }
 
-        if (!name || !email || !motivationLetter) {
-            setError('All fields are required.');
-            return;
-        }
-
-        try {
-            await addDoc(collection(db, 'applications'), {
-                jobId: currentJobId,
-                userId: user.uid,
-                name,
-                email,
-                motivationLetter,
-                avatar: user.photoURL,
-                appliedAt: Timestamp.now(),
-            });
-            alert('Application submitted successfully!');
-            setIsApplicationModalOpen(false);
-            setName('');
-            setEmail('');
-            setMotivationLetter('');
-        } catch (err) {
-            setError('Failed to submit application. Please try again.');
-        }
-    };
 
     // Clear all filters
     const clearFilters = () => {
@@ -148,7 +124,7 @@ const Jobs = () => {
     };
 
     return (
-        <div className="lg:h-[93.5vh] w-full bg-gray-50 dark:bg-dark-secondary mt-[6.5vh] p-4 sm:p-6 lg:p-8 lg:fixed">
+        <div className="lg:h-[93.5vh] w-full  bg-dark-secondary  p-4 sm:p-6 lg:p-8 lg:fixed">
             <div className="max-w-7xl mx-auto space-y-6">
                 {/* Error Message */}
                 {error && (
@@ -160,81 +136,13 @@ const Jobs = () => {
                     </div>
                 )}
 
-                {/* Application Modal */}
-                <AnimatePresence>
-                    {isApplicationModalOpen && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                        >
-                            <motion.div
-                                initial={{ scale: 0.9 }}
-                                animate={{ scale: 1 }}
-                                exit={{ scale: 0.9 }}
-                                className="bg-white dark:bg-dark-primary rounded-lg shadow-lg p-6 w-full max-w-md"
-                            >
-                                <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Apply for Job</h2>
-                                    <button onClick={() => setIsApplicationModalOpen(false)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                                        <X className="h-6 w-6" />
-                                    </button>
-                                </div>
-                                <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        handleApply();
-                                    }}
-                                    className="space-y-4"
-                                >
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-                                        <input
-                                            type="text"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-secondary text-gray-900 dark:text-gray-100 focus:outline-none"
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-                                        <input
-                                            type="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-secondary text-gray-900 dark:text-gray-100 focus:outline-none"
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Motivation Letter</label>
-                                        <textarea
-                                            value={motivationLetter}
-                                            onChange={(e) => setMotivationLetter(e.target.value)}
-                                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-secondary text-gray-900 dark:text-gray-100 focus:outline-none"
-                                            rows={4}
-                                            required
-                                        />
-                                    </div>
-                                    <button
-                                        type="submit"
-                                        className="w-full bg-theme-primary hover:opacity-90 text-white px-4 py-2 rounded-lg transition-opacity"
-                                    >
-                                        Submit Application
-                                    </button>
-                                </form>
-                            </motion.div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                     <ApplyModal  setIsApplicationModalOpen={setIsApplicationModalOpen} isApplicationModalOpen={isApplicationModalOpen} currentJobId={currentJobId} setError={setError}/>
 
                 {/* Main Grid Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Job List Section */}
                     <div className="lg:col-span-2">
-                        <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm p-4 mb-6">
+                        <div className="bg-dark-primary rounded-lg shadow-sm p-4 mb-6">
                             {/* Search and Filters Section */}
                             <div className="flex flex-col sm:flex-row gap-4 mb-4">
                                 <div className="relative flex-1">
@@ -246,7 +154,7 @@ const Jobs = () => {
                                         placeholder="Search jobs..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-[#30363d] rounded-lg focus:outline-none bg-white dark:bg-dark-secondary text-gray-900 dark:text-[#c9d1d9] placeholder-gray-400 dark:placeholder-[#8b949e]"
+                                        className="w-full pl-10 pr-3 py-2 border border-[#30363d] rounded-lg focus:outline-none bg-dark-secondary text-[#c9d1d9] placeholder-[#8b949e]"
                                     />
                                 </div>
 
@@ -259,39 +167,39 @@ const Jobs = () => {
                                         placeholder="Location..."
                                         value={locationQuery}
                                         onChange={(e) => setLocationQuery(e.target.value)}
-                                        className="w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none bg-white dark:bg-dark-secondary text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                                        className="w-full pl-10 pr-3 py-2 border border-gray-600 rounded-lg focus:outline-none bg-dark-secondary text-gray-100 placeholder-gray-500"
                                     />
                                 </div>
                             </div>
 
                             {/* Filters Section */}
-                            <div className="pt-4 border-t border-gray-200 dark:border-[#21262d]">
+                            <div className="pt-4 border-tborder-[#21262d]">
                                 <div className="flex flex-wrap gap-4">
                                     {/* Job Type Filter */}
                                     <div className="flex-1 min-w-[200px]">
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">
                                             Job Type
                                         </label>
                                         <select
-                                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-secondary text-gray-900 dark:text-gray-100 focus:outline-none"
+                                            className="w-full px-3 py-2 rounded-lg border  border-gray-600 bg-dark-secondary text-gray-100 focus:outline-none"
                                             value={jobType}
                                             onChange={(e) => setJobType(e.target.value)}
                                         >
                                             <option value="">All Types</option>
-                                            <option value="full-time">Full-time</option>
-                                            <option value="part-time">Part-time</option>
-                                            <option value="contract">Contract</option>
-                                            <option value="freelance">Freelance</option>
+                                            <option value="Full-time">Full-time</option>
+                                            <option value="Part-time">Part-time</option>
+                                            <option value="Contract">Contract</option>
+                                            <option value="Freelance">Freelance</option>
                                         </select>
                                     </div>
 
                                     {/* Salary Range Filter */}
                                     <div className="flex-1 min-w-[200px]">
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">
                                             Salary Range
                                         </label>
                                         <select
-                                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-secondary text-gray-900 dark:text-gray-100 focus:outline-none"
+                                            className="w-full px-3 py-2 rounded-lg border border-gray-600 bg-dark-secondary text-gray-100 focus:outline-none"
                                             value={salaryRange}
                                             onChange={(e) => setSalaryRange(e.target.value)}
                                         >
@@ -305,11 +213,11 @@ const Jobs = () => {
 
                                     {/* Date Posted Filter */}
                                     <div className="flex-1 min-w-[200px]">
-                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        <label className="block text-sm font-medium text-gray-300 mb-1">
                                             Date Posted
                                         </label>
                                         <select
-                                            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-dark-secondary text-gray-900 dark:text-gray-100 focus:outline-none"
+                                            className="w-full px-3 py-2 rounded-lg border border-gray-600 bg-dark-secondary text-gray-100 focus:outline-none"
                                             value={datePosted}
                                             onChange={(e) => setDatePosted(e.target.value)}
                                         >
@@ -327,30 +235,24 @@ const Jobs = () => {
                                     {(jobType || salaryRange || datePosted) && (
                                         <>
                                             {jobType && (
-                                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 dark:bg-dark-secondary text-sm text-gray-700 dark:text-[#c9d1d9]">
+                                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full  bg-dark-secondary text-sm text-[#c9d1d9]">
                                                     {jobType}
-                                                    <button onClick={() => setJobType('')} className="ml-1 hover:text-gray-900 dark:hover:text-gray-100">
-                                                        ×
-                                                    </button>
+                                                    <button onClick={() => setJobType('')} className="ml-1  hover:text-gray-100"> ×</button>
                                                 </span>
                                             )}
                                             {salaryRange && (
-                                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 dark:bg-dark-secondary text-sm text-gray-700 dark:text-[#c9d1d9]">
+                                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-dark-secondary text-sm text-[#c9d1d9]">
                                                     {salaryRange}
-                                                    <button onClick={() => setSalaryRange('')} className="ml-1 hover:text-gray-900 dark:hover:text-gray-100">
-                                                        ×
-                                                    </button>
+                                                    <button onClick={() => setSalaryRange('')} className="ml-1  hover:text-gray-100">×</button>
                                                 </span>
                                             )}
                                             {datePosted && (
-                                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 dark:bg-dark-secondary text-sm text-gray-700 dark:text-[#c9d1d9]">
+                                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-dark-secondary text-sm text-[#c9d1d9]">
                                                     {datePosted}
-                                                    <button onClick={() => setDatePosted('')} className="ml-1 hover:text-gray-900 dark:hover:text-gray-100">
-                                                        ×
-                                                    </button>
+                                                    <button onClick={() => setDatePosted('')} className="ml-1 hover:text-gray-100"> ×</button>
                                                 </span>
                                             )}
-                                            <button onClick={clearFilters} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                                            <button onClick={clearFilters} className="text-sm text-gray-400  hover:text-gray-200">
                                                 Clear all filters
                                             </button>
                                         </>
@@ -361,11 +263,11 @@ const Jobs = () => {
                         
 
                         {/* Job Cards */}
-                        <div className="space-y-6 overflow-y-auto h-[calc(100vh-300px)]">
+                        <div className="space-y-6 overflow-y-auto h-[70vh] lg:pb-40 noScrollBar">
                                 {isLoading ? (
                                     <div className="space-y-4">
                                         {[...Array(5)].map((_, index) => (
-                                            <div key={index} className="bg-white dark:bg-dark-primary rounded-lg shadow-sm p-4">
+                                            <div key={index} className="bg-dark-primary rounded-lg shadow-sm p-4">
                                                 <div className="flex gap-4">
                                                     <Skeleton className="h-12 w-12 rounded-lg" />
                                                     <div className="flex-1 space-y-2">
@@ -394,7 +296,10 @@ const Jobs = () => {
                         </div>
                         
                     </div>
-                  <PostJobSection />
+                    <div className='space-y-5'>
+                             <PostJobSection />
+                             <MessagesList></MessagesList>
+                  </div>
                 </div>
             </div>
         </div>

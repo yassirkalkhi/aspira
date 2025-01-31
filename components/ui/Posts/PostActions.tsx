@@ -1,20 +1,5 @@
-import { useState, useEffect, useCallback, ReactNode } from 'react';
-import { 
-  doc, 
-  getDoc, 
-  getDocs, 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  updateDoc, 
-  addDoc, 
-  deleteDoc, 
-  increment, 
-  serverTimestamp,
-  setDoc,
-  Timestamp
-} from 'firebase/firestore';
+import { useState, useEffect, useCallback } from 'react';
+import { doc, getDoc, getDocs, collection, query, where, orderBy, updateDoc, addDoc, deleteDoc,increment,serverTimestamp,setDoc,} from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import Button from '@/components/ui/shadcn/ui/Button';
 import RenderUserComment from '@/components/ui/Comments/RenderUserComment';
@@ -80,15 +65,14 @@ const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
     if (showComments) {
       const fetchComments = async () => {
         try {
-          const commentsSnapshot = await getDocs(
+          const comments = await getDocs(
             query(
               collection(db, 'comments'),
               where('postId', '==', postId),
               orderBy('createdAt', 'desc')
             )
           );
-          
-          const commentsData = commentsSnapshot.docs.map(doc => ({
+          const commentsData = comments.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
             createdAt: doc.data().createdAt?.toDate() || new Date()
@@ -201,7 +185,7 @@ const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
   return (
     <>
       {error && (
-        <div className="p-2 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 rounded-lg">
+        <div className="p-2 text-sm text-red-500 bg-red-900/10 rounded-lg">
           {error}
         </div>
       )}
@@ -211,9 +195,9 @@ const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
         onClick={handleLike}
         disabled={isActionInProgress}
         className={`flex items-center justify-center gap-2 px-2 py-2.5 
-        ${liked ? 'text-red-500' : 'text-gray-500 dark:text-[#8b949e]'}
-        hover:bg-gray-50 dark:hover:bg-dark-secondary rounded-lg 
-        hover:text-gray-900 dark:hover:text-[#c9d1d9]
+        ${liked ? 'text-red-500' : 'text-[#8b949e]'}
+        hover:bg-dark-secondary rounded-lg 
+        hover:text-[#c9d1d9]
         disabled:opacity-50 disabled:cursor-not-allowed
         `}
       >
@@ -226,9 +210,9 @@ const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
       <button
         onClick={() => setShowComments(!showComments)}
         className="flex items-center justify-center gap-2 px-2 py-2.5 
-        text-gray-500 dark:text-[#8b949e]
-        hover:bg-gray-50 dark:hover:bg-dark-secondary rounded-lg 
-        hover:text-gray-900 dark:hover:text-[#c9d1d9]"
+        text-[#8b949e]
+       hover:bg-dark-secondary rounded-lg 
+       hover:text-[#c9d1d9]"
       >
         <MessageCircle className="h-5 w-5 transition-none" />
         <span className="text-sm font-medium">{stats.comments}</span>
@@ -238,9 +222,9 @@ const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
         onClick={handleShare}
         disabled={shared || isActionInProgress}
         className={`flex items-center justify-center gap-2 px-2 py-2.5 
-        ${shared ? 'text-blue-500' : 'text-gray-500 dark:text-[#8b949e]'}
-        hover:bg-gray-50 dark:hover:bg-dark-secondary rounded-lg 
-        hover:text-gray-900 dark:hover:text-[#c9d1d9]
+        ${shared ? 'hidden ' : 'text-[#8b949e]'}
+        hover:bg-dark-secondary rounded-lg 
+        hover:text-[#c9d1d9]
         disabled:opacity-50 disabled:cursor-not-allowed
         `}
       >

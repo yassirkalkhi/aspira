@@ -1,11 +1,4 @@
-import { 
-  Search,
-  MessageSquare,
-  Bell,
-  Settings,
-  LogOut,
-  User
-} from 'lucide-react';
+import { Search,MessageSquare,} from 'lucide-react';
 import  Link  from 'next/link';
 import ProfileDropdown from '@/components/Dropdowns/profileDropdown';
 import NotificationsDropdown from '@/components/Dropdowns/notificationsDropdown';
@@ -16,13 +9,12 @@ const Header = () => {
     uid : 'id1'
   }
   const handleLogout = () => {
-   
     console.log('Logging out...');
   };
 
   return (
     <>
-      <header className="w-full fixed top-0 shadow-sm bg-dark-primary z-50">
+      <header className="w-full  shadow-sm bg-dark-primary z-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4 flex-1">

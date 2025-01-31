@@ -1,167 +1,134 @@
-import {
-  useState
-} from "react";
-import {
-  X,
-  ArrowRight,
-  ArrowLeft,
-  AlertCircle
-} from "lucide-react";
-import {
-  Timestamp
-} from "firebase/firestore";
-import {
-  doc,
-  setDoc,
-  collection
-} from "firebase/firestore";
-import {
-  jobFormStep1Schema,
-  jobFormStep2Schema,
-  jobFormStep3Schema,
-  jobFormStep4Schema,
-  type JobFormData
-} from "@/validation/formValidations";
-import {
-  z
-} from "zod";
-import {
-  db
-} from "@/lib/firebase";
+import { useState } from "react";
+import { X, ArrowRight, ArrowLeft, } from "lucide-react";
+import { Timestamp } from "firebase/firestore";
+import { doc, setDoc, collection } from "firebase/firestore";
+import { jobFormStep1Schema, jobFormStep2Schema, jobFormStep3Schema, jobFormStep4Schema, type JobFormData } from "@/validation/formValidations";
+import { z } from "zod";
+import { db } from "@/lib/firebase";
 import ErrorMessage from "./FormParts/ErrorMessage";
 import SelectField from "./FormParts/SelectField";
 import InputField from "./FormParts/InputField";
 import Checkbox from "./FormParts/Checkbox";
 import TextArea from "./FormParts/Textarea";
+
+
+
 const PostJobSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [step, setStep] = useState(1);
   const initialFormData: JobFormData = {
-      title: "",
-      company: "",
-      logo: "",
-      location: "",
-      type: "Full-time",
-      salary: "",
-      isRemote: false,
-      level: "Mid Level",
-      description: "",
-      requirements: [""],
-      companyDescription: "",
-      expiresAt: ""
+    title: "",
+    company: "",
+    logo: "",
+    location: "",
+    type: "Full-time",
+    salary: "",
+    isRemote: false,
+    level: "Mid Level",
+    description: "",
+    requirements: [""],
+    companyDescription: "",
+    expiresAt: ""
   }
-  const [formData, setFormData] = useState < JobFormData > (initialFormData);
-  const [errors, setErrors] = useState < Record < string, string >> ({});
-  const handleInputChange = (e: React.ChangeEvent < HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement > ) => {
-      const {
-          name,
-          value
-      } = e.target;
-      setFormData(prev => ({
-          ...prev,
-          [name]: value
-      }));
-      if (errors[name]) setErrors(prev => ({
-          ...prev,
-          [name]: ""
-      }));
+  const [formData, setFormData] = useState<JobFormData>(initialFormData);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
   };
+
   const handleRequirementChange = (index: number, value: string) => {
-      const newRequirements = [...formData.requirements];
-      newRequirements[index] = value;
-      setFormData(prev => ({
-          ...prev,
-          requirements: newRequirements
-      }));
-      if (errors.requirements) setErrors(prev => ({
-          ...prev,
-          requirements: ""
-      }));
+    const newRequirements = [...formData.requirements];
+    newRequirements[index] = value;
+    setFormData(prev => ({ ...prev, requirements: newRequirements }));
+    if (errors.requirements) setErrors(prev => ({ ...prev, requirements: "" }));
   };
+
   const addRequirement = () => {
-      setFormData(prev => ({
-          ...prev,
-          requirements: [...prev.requirements, ""]
-      }));
+    setFormData(prev => ({ ...prev, requirements: [...prev.requirements, ""] }));
   };
+
   const removeRequirement = (index: number) => {
-      setFormData(prev => ({
-          ...prev,
-          requirements: prev.requirements.filter((_, i) => i !== index)
-      }));
+    setFormData(prev => ({ ...prev, requirements: prev.requirements.filter((_, i) => i !== index) }));
   };
+
   const validateStep = async (stepNumber: number) => {
-      let schema;
-      switch (stepNumber) {
-          case 1:
-              schema = jobFormStep1Schema;
-              break;
-          case 2:
-              schema = jobFormStep2Schema;
-              break;
-          case 3:
-              schema = jobFormStep3Schema;
-              break;
-          case 4:
-              schema = jobFormStep4Schema;
-              break;
-          default:
-              return false;
+    let schema;
+    switch (stepNumber) {
+      case 1:
+        schema = jobFormStep1Schema;
+        break;
+      case 2:
+        schema = jobFormStep2Schema;
+        break;
+      case 3:
+        schema = jobFormStep3Schema;
+        break;
+      case 4:
+        schema = jobFormStep4Schema;
+        break;
+      default:
+        return false;
+    }
+
+    try {
+      await schema.parseAsync(formData);
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const newErrors: Record<string, string> = {};
+        (error as z.ZodError).issues.forEach(issue => {
+          const path = issue.path[0];
+          if (path) newErrors[path] = issue.message;
+        });
+        setErrors(newErrors);
       }
-      try {
-          await schema.parseAsync(formData);
-          setErrors({});
-          return true;
-      } catch (error) {
-          if (error instanceof z.ZodError) {
-              const newErrors: Record < string, string > = {};
-              (error as z.ZodError).issues.forEach(issue => {
-                  const path = issue.path[0];
-                  if (path) newErrors[path] = issue.message;
-              });
-              setErrors(newErrors);
-          }
-          return false;
-      }
+      return false;
+    }
   };
   const handleNext = async () => {
-      const isValid = await validateStep(step);
-      if (isValid) setStep(prev => prev + 1);
+    const isValid = await validateStep(step);
+    if (isValid) setStep(prev => prev + 1);
   };
+
   const handleBack = () => setStep(prev => prev - 1);
+
   const handleSubmit = async () => {
-      const isValid = await validateStep(4);
-      if (!isValid) return;
-      const jobData = {
-          ...formData,
-          salary: Number(formData.salary),
-          applicants: 0,
-          requirements: formData.requirements.filter(req => req.trim()),
-          postedAt: Timestamp.now(),
-          expiresAt: Timestamp.fromDate(new Date(formData.expiresAt)),
-          isRemote: formData.isRemote
-      };
-      try {
-          await setDoc(doc(collection(db, "jobs")), jobData);
-          alert("Job posted successfully!");
-          setStep(1)
-          setFormData(initialFormData)
-      } catch (error) {
-          console.error("Error posting job:", error);
-          setErrors({
-              submit: "Error posting job. Please try again."
-          });
-      }
-      setIsModalOpen(false);
+    const isValid = await validateStep(4);
+    if (!isValid) return;
+    const jobData = {
+      ...formData,
+      salary: Number(formData.salary),
+      applicants: 0,
+      requirements: formData.requirements.filter(req => req.trim()),
+      postedAt: Timestamp.now(),
+      expiresAt: Timestamp.fromDate(new Date(formData.expiresAt)),
+      isRemote: formData.isRemote
+    };
+    try {
+      await setDoc(doc(collection(db, "jobs")), jobData);
+      alert("Job posted successfully!");
+      setStep(1)
+      setFormData(initialFormData)
+    } catch (error) {
+      console.error("Error posting job:", error);
+      setErrors({
+        submit: "Error posting job. Please try again."
+      });
+    }
+    setIsModalOpen(false);
   };
-  return (<div className="bg-dark-primary rounded-lg p-6 shadow-lg">
+  return (<div className="bg-dark-primary h-min rounded-lg p-6  shadow-lg">
     {/* Banner Section */}
     <div className="space-y-4">
       <h2 className="text-2xl font-semibold text-theme-secondary">Ready to hire?</h2>
       <p className="text-theme-secondary/80">
         Post your job to reach thousands of qualified candidates
       </p>
-      
+
       <button
         onClick={() => setIsModalOpen(true)}
         className="w-full bg-theme-primary hover:bg-opacity-90 text-theme-secondary py-3 rounded-lg font-medium transition-all"
@@ -189,7 +156,7 @@ const PostJobSection = () => {
               <h2 className="text-xl font-semibold text-theme-secondary">
                 Post a Job - Step {step} of 4
               </h2>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-theme-secondary/80 hover:text-theme-secondary"
               >
@@ -242,7 +209,7 @@ const PostJobSection = () => {
                       error={errors.location}
                       required
                     />
-                    
+
                     <div className="flex gap-4">
                       <SelectField
                         label="Job Type"
@@ -297,14 +264,14 @@ const PostJobSection = () => {
                 <div className="space-y-6">
                   <h3 className="text-lg font-medium text-theme-secondary">Job Description</h3>
                   <div className="space-y-4">
-                    <TextArea label="Job Description" name="description" value={formData.description} onChange={handleInputChange}  error={errors.description} rows={4} required />
+                    <TextArea label="Job Description" name="description" value={formData.description} onChange={handleInputChange} error={errors.description} rows={4} required />
                     <div className="space-y-2">
                       <label className="block text-sm font-medium text-theme-secondary">
                         Requirements <span className="text-red-500">*</span>
                       </label>
                       {formData.requirements.map((req, index) => (
                         <div key={index} className="flex gap-2 mb-2">
-                          <input type="text" value={req} onChange={(e) => handleRequirementChange(index, e.target.value)} className="flex-1 bg-dark-secondary text-theme-secondary border border-dark-primary rounded-lg p-2" placeholder="Add requirement"/>
+                          <input type="text" value={req} onChange={(e) => handleRequirementChange(index, e.target.value)} className="flex-1 bg-dark-secondary text-theme-secondary border border-dark-primary rounded-lg p-2" placeholder="Add requirement" />
                           <button onClick={() => removeRequirement(index)} className="text-red-500 hover:text-red-700" > <X className="h-5 w-5" /></button>
                         </div>))}
 
@@ -320,7 +287,7 @@ const PostJobSection = () => {
               {step === 4 && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-medium text-theme-secondary">Company Info</h3>
-                  <TextArea label="Company Description" name="companyDescription" value={formData.companyDescription} onChange={handleInputChange} error={errors.companyDescription} rows={6} required/>
+                  <TextArea label="Company Description" name="companyDescription" value={formData.companyDescription} onChange={handleInputChange} error={errors.companyDescription} rows={6} required />
                 </div>
               )}
             </div>
@@ -348,13 +315,14 @@ const PostJobSection = () => {
     )}
   </div>);
 };
-const StatItem = ({
-  value,
-  label
-}: {
-  value: string;label: string
-}) => (<div>
+
+
+export default PostJobSection;
+
+
+
+const StatItem = ({ value, label }: { value: string; label: string }) =>
+(<div>
   <div className="text-xl font-bold text-theme-primary">{value}</div>
   <div className="text-sm text-theme-secondary/80">{label}</div>
 </div>);
-export default PostJobSection;

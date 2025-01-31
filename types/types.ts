@@ -57,6 +57,14 @@ export interface Comment {
   createdAt: Date;
 }
 
+export interface Notification {
+    link: string,
+    imageUrl: string,
+    from: string,
+    message: string,
+    time: string
+}
+
 export interface Job {
     id: number,
     title: string,

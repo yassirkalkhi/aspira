@@ -40,7 +40,6 @@ const PostJob = () => {
     // Handle post submission
     const handlePost = async () => {
         if (!content.trim() && files.length === 0) return;
-
         setIsPosting(true);
         setErrorMessage(null);
 
@@ -62,10 +61,10 @@ const PostJob = () => {
                     } catch (error) {
                         if (axios.isAxiosError(error)) {
                             console.error('Axios error:', error.response?.data);  
-                            setErrorMessage(`Error uploading file: ${error.response?.data?.message || 'Unknown error'}`);
+                            setErrorMessage('Error uploading files');
                         } else {
                             console.error('Unknown error:', error);
-                            setErrorMessage(`Error uploading file: ${fileObj.file.name}`);
+                            setErrorMessage('Error uploading files');
                         }
                     }
                 })
@@ -103,7 +102,7 @@ const PostJob = () => {
     };
 
     return (
-        <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm">
+        <div className="bg-dark-primary rounded-lg shadow-sm">
             <div className="p-4">
                 <div className="flex gap-3">
                     <img
@@ -113,9 +112,9 @@ const PostJob = () => {
                     />
                     <button
                         onClick={() => setIsExpanded(true)}
-                        className={`flex-1 text-left px-4 py-3 rounded-full border border-gray-300 dark:border-dark-secondary
-                                         hover:bg-gray-100 dark:hover:bg-dark-secondary text-gray-500 dark:text-white/50 transition-colors
-                                         ${isExpanded ? 'bg-gray-100 dark:bg-dark-secondary' : ''}`}
+                        className={`flex-1 text-left px-4 py-3 rounded-full border border-dark-secondary
+                                         hover:bg-dark-secondary text-white/50 transition-colors
+                                         ${isExpanded ? 'bg-dark-secondary' : ''}`}
                     >
                         Start a post
                     </button>
@@ -128,8 +127,8 @@ const PostJob = () => {
                             value={content}
                             onChange={(e) => setContent(e.target.value)}
                             placeholder="What do you want to talk about?"
-                            className="w-full bg-transparent resize-none outline-none text-gray-700 dark:text-[#c9d1d9]
-                                             placeholder-gray-500 dark:placeholder-[#8b949e] min-h-[120px]"
+                            className="w-full bg-transparent resize-none outline-none text-[#c9d1d9]
+                                             placeholder-[#8b949e] min-h-[120px]"
                             rows={4}
                             maxLength={500}
                         />
@@ -153,7 +152,7 @@ const PostJob = () => {
                 )}
             </div>
 
-            <div className="border-t dark:border-[#21262d] px-4 py-2">
+            <div className="border-t border-[#21262d] px-4 py-2">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center -ml-2">
                         <input
@@ -168,10 +167,10 @@ const PostJob = () => {
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
                             className="inline-flex items-center p-2 rounded transition-colors gap-2
-                                                 hover:bg-gray-100 dark:hover:bg-dark-secondary group"
+                                                 hover:bg-dark-secondary group"
                         >
-                            <Image className="h-5 w-5 text-gray-900/60 dark:text-[#c9d1d9]" />
-                            <span className="text-sm hidden sm:block text-gray-900 dark:text-[#c9d1d9]">Media</span>
+                            <Image className="h-5 w-5 text-[#c9d1d9]" />
+                            <span className="text-sm hidden sm:block text-[#c9d1d9]">Media</span>
                         </button>
                     </div>
                     {isExpanded && (
@@ -182,8 +181,8 @@ const PostJob = () => {
                                     setContent('');
                                     setFiles([]);
                                 }}
-                                className="px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-[#c9d1d9]
-                                                 hover:bg-gray-100 dark:hover:bg-dark-secondary rounded transition-colors"
+                                className="px-3 py-1.5 text-sm font-medium text-[#c9d1d9]
+                                                 hover:bg-dark-secondary rounded transition-colors"
                             >
                                 Cancel
                             </button>
@@ -198,7 +197,7 @@ const PostJob = () => {
                     )}
                 </div>
                 {errorMessage && (
-                    <div className="mt-2 text-red-600 dark:text-red-400">
+                    <div className="mt-2 text-red-400">
                         {errorMessage}
                     </div>
                 )}

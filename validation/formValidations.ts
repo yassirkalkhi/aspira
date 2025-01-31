@@ -16,12 +16,12 @@ export const jobFormStep2Schema = z.object({
 });
 
 export const jobFormStep3Schema = z.object({
-  description: z.string().min(1, "Description is required").min(100, "Description must be at least 100 characters"),
+  description: z.string().min(1, "Description is required").min(40, "Description must be at least 100 characters"),
   requirements: z.array(z.string().min(1, "Requirement cannot be empty")).min(1, "At least one requirement is needed")
 });
 
 export const jobFormStep4Schema = z.object({
-  companyDescription: z.string().min(1, "Company description is required").min(50, "Company description must be at least 50 characters")
+  companyDescription: z.string().min(1, "Company description is required").min(40, "Company description must be at least 50 characters")
 });
 
 export type JobFormData = z.infer<typeof jobFormStep1Schema 
