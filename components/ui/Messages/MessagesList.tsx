@@ -8,37 +8,45 @@ import { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 
 const MessagesList = () => {
-  const user = { uid: 'id1' };
+  const currentUser = { uid: 'HKStDfpvimUezZ8bn35p' };
   const router = useRouter();
   const [messages, setMessages] = useState<any[]>([]);
 
   const messagesRef = collection(db, "messages");
-  const q = user?.uid && query(messagesRef,where("receiverId", "==", user.uid),orderBy('timestamp', 'desc'),limit(6));
+  const q = currentUser?.uid && query(messagesRef,where("receiverId", "==", currentUser.uid),orderBy('timestamp', 'desc'),limit(6));
   const [messagesSnapshot, messagesLoading, messagesError] = useCollection(q || null);
 
   useEffect(() => {
     if (messagesSnapshot?.docs) {
-      const senderMessages: { [key: string]: any } = {}; 
-
+      const senderMessages: { [key: string]: any } = {};
+  
       messagesSnapshot.docs.forEach((messageDoc) => {
         const message = messageDoc.data();
-        const userDocRef = doc(db, "users", message.senderId);
-        onSnapshot(userDocRef, (userSnapshot) => {
-          const userData = userSnapshot.data();
-          if (userData) {
-            if (!senderMessages[message.senderId] || senderMessages[message.senderId].timestamp < message.timestamp) {
-              senderMessages[message.senderId] = {
-                ...message,
-                id: messageDoc.id,
-                senderAvatar: userData.AvatarURL,
-                senderName: `${userData.firstName} ${userData.lastName}`,
-                senderIsOnline: userData.isOnline,
-                senderUsername: userData.username,
-              };
+        const userQuery = query(
+          collection(db, "profiles"),
+          where("id", "==", message.senderId)
+        );
+        onSnapshot(userQuery, (querySnapshot) => {
+          querySnapshot.forEach((userDoc) => {
+            const userData = userDoc.data();
+            if (userData) {
+              if (
+                !senderMessages[message.senderId] ||
+                senderMessages[message.senderId].timestamp < message.timestamp
+              ) {
+                senderMessages[message.senderId] = {
+                  ...message,
+                  id: messageDoc.id,
+                  senderAvatar: userData.avatar,
+                  senderName: userData.username,
+                  senderIsOnline: userData.isOnline,
+                  senderUsername: userData.username,
+                };
+              }
+              const latestMessages = Object.values(senderMessages);
+              setMessages(latestMessages);
             }
-            const latestMessages = Object.values(senderMessages);
-            setMessages(latestMessages);
-          }
+          });
         });
       });
     }
@@ -52,7 +60,7 @@ const MessagesList = () => {
           <MessageSquare className="h-5 w-5" />
         </Link>
       </div>
-      {!user.uid && <p className="text-gray-400">Sign in to view messages.</p>}
+      {!currentUser.uid && <p className="text-gray-400">Sign in to view messages.</p>}
       {messagesLoading && <p className="text-gray-400">Loading messages...</p>}
       {messagesError && <p className="text-red-500">Error Getting messages !</p>}
       {messages.length === 0 && !messagesLoading && (

@@ -42,6 +42,7 @@ const PostsList = () => {
                         name: data.author.name,
                         avatar: data.author.avatar,
                         title: data.author.title,
+                        id : data.author.id,
                     },
                     content: data.content,
                     medias: data.medias,

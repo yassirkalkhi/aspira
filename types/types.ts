@@ -9,29 +9,21 @@ export interface User {
     isOnline : boolean,
     lastName : string,
     role : string ,
-    username : string
+    username : string,
+    hasProfile : boolean
 }
 
 
 
 
-export interface Message {
-    id: number;
-    user: {
-        name: string;
-        avatar: string;
-        isOnline: boolean;
-        lastSeen: string;
-    };
-    conversation: {
-        id: number;
-        sender: 'them' | 'me';
-        text: string;
-        time: string;
-    }[];
-    unreadCount: number;
-    lastMessage: string;
-}
+ export interface Message {
+    id: string;
+    senderId: string;
+    receiverId: string;
+    content: string;
+    timestamp: Timestamp;
+    conversationId: string;
+  }
 
 export interface Post{
         id: string,
@@ -40,6 +32,7 @@ export interface Post{
           name: string,
           avatar: string,
           title:string,
+          id : string,
         },
         content: string,
         medias? : {url : string , type : string}[] | null,
@@ -98,4 +91,34 @@ export interface Trending{
   posts: number,
   category: string,
   trending: boolean
+}
+
+export interface UserData {
+  id: string;
+  username: string;
+  avatar: string;
+  cover: string;
+  bio: string;
+  position: string;
+  company: string;
+  location: string;
+  website: string;
+  joinDate: string;
+  following: number;
+  followers: number;
+  about: string;
+  skills: string[];
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  technologies: string[];
+  githubUrl: string;
+  liveUrl: string;
+  status: string;
+  featured: boolean;
+  createdAt: string | Date;
 }

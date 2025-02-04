@@ -5,7 +5,7 @@ import React , {useState} from 'react'
 const profileDropdown = () => {
     const [isOpen , setIsOpen] = useState(false)
     const user = {
-        name : 'yasser kalkhi',
+        name : 'Trapx 120',
         email : 'yasserkalkhi@gmail.com'
     }
    const handleSignOut = async ()=>{

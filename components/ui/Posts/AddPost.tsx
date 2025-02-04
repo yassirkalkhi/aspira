@@ -13,7 +13,8 @@ const PostJob = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const currentUser = {
-        uid: 'id1',
+        uid: '5UFmay1soARhvs7SZwS0mn5l1q93',
+        role:'user',
         displayName: 'John Doe',
         photoURL: 'https://github.com/shadcn.png',
         title: 'Software Engineer',
@@ -73,10 +74,12 @@ const PostJob = () => {
             const validFiles = uploadedFiles.filter(Boolean) as string[];
 
             await addDoc(collection(db, 'posts'), {
+                source : currentUser.role,
                 author: {
                     name: currentUser.displayName,
                     avatar: currentUser.photoURL,
                     title: currentUser.title, 
+                    id: currentUser.uid
                 },
                 content: content.trim(),
                 medias: validFiles.map((url, index) => ({
