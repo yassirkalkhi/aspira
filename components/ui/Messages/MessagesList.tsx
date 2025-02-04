@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 
 const MessagesList = () => {
-  const currentUser = { uid: 'HKStDfpvimUezZ8bn35p' };
+  const currentUser = { uid: '5UFmay1soARhvs7SZwS0mn5l1q93' };
   const router = useRouter();
   const [messages, setMessages] = useState<any[]>([]);
 

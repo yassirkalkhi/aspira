@@ -1,34 +1,38 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import {Message} from '@/types/types'
-import { collection, query, where, onSnapshot, orderBy, Timestamp, addDoc, getDoc, doc, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase'; // Ensure you have this configuration file
+import { Message } from '@/types/types';
+import { collection, query, where, onSnapshot, orderBy, Timestamp, addDoc, getDoc, doc, getDocs, limit } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { Menu, X, Search } from 'lucide-react';
 
-
-
 interface Profile {
-  id: string; 
+  id: string;
   username: string;
   avatar: string;
 }
 
+interface Conversation {
+  id: string;
+  participants: string[];
+  lastMessage?: string;
+  senderUsername?: string;
+}
 
 const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [conversations, setConversations] = useState<{ id: string; participants: any[] }[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [openedConversation, setOpenedConversation] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [showProfileSearch, setShowProfileSearch] = useState(false); // Toggle profile search
-  const [profiles, setProfiles] = useState<Profile[]>([]); // Store fetched profiles
-  const [searchQuery, setSearchQuery] = useState(''); // Store search query
-  const [avatars, setAvatars] = useState<{ [key: string]: string }>({}); // Store avatars for participants
+  const [showProfileSearch, setShowProfileSearch] = useState(false);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [avatars, setAvatars] = useState<{ [key: string]: string }>({});
 
   const currentUser = {
-    uid: 'HKStDfpvimUezZ8bn35p',
+    uid: '5UFmay1soARhvs7SZwS0mn5l1q93',
     username: 'yasserkalkhi',
   };
 
@@ -85,19 +89,26 @@ const ChatInterface = () => {
         collection(db, 'conversations'),
         where('participants', 'array-contains', currentUser.uid)
       );
+
       const unsubscribe = onSnapshot(
         q,
-        (querySnapshot) => {
-          const fetchedConversations = querySnapshot.docs.map((doc) => {
-            const participants = doc.data().participants.filter((participant: string) => participant !== currentUser.uid);
-            return {
-              id: doc.id,
-              participants: participants,
-            };
-          }) as { id: string; participants: any[] }[];
+        async (querySnapshot) => {
+          const fetchedConversations = await Promise.all(
+            querySnapshot.docs.map(async (doc) => {
+              const participants = doc.data().participants.filter((participant: string) => participant !== currentUser.uid);
+              const lastMessage = await fetchLastMessage(doc.id);
+              const senderUsername = await fetchUsername(participants[0]);
+              return {
+                id: doc.id,
+                participants,
+                lastMessage: lastMessage?.content || 'No messages yet',
+                senderUsername: senderUsername || 'Unknown',
+              };
+            })
+          );
           setConversations(fetchedConversations);
           setLoading(false);
-          fetchAvatarsForConversations(fetchedConversations); // Fetch avatars for participants
+          fetchAvatarsForConversations(fetchedConversations);
         },
         (error) => {
           console.error('Error fetching conversations:', error);
@@ -114,8 +125,29 @@ const ChatInterface = () => {
     }
   };
 
+  // Fetch the last message for a conversation
+  const fetchLastMessage = async (conversationId: string) => {
+    const q = query(
+      collection(db, 'messages'),
+      where('conversationId', '==', conversationId),
+      orderBy('timestamp', 'desc'),
+      limit(1)
+    );
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) return null;
+    return querySnapshot.docs[0].data() as Message;
+  };
+
+  // Fetch username for a participant
+  const fetchUsername = async (participantId: string) => {
+    const q = query(collection(db, 'profiles'), where('id', '==', participantId));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) return null;
+    return querySnapshot.docs[0].data().username;
+  };
+
   // Fetch avatars for all participants in conversations
-  const fetchAvatarsForConversations = async (conversations: { id: string; participants: any[] }[]) => {
+  const fetchAvatarsForConversations = async (conversations: Conversation[]) => {
     const avatarMap: { [key: string]: string } = {};
 
     for (const conversation of conversations) {
@@ -134,11 +166,8 @@ const ChatInterface = () => {
   const fetchUserAvatar = async (id: string) => {
     const q = query(collection(db, 'profiles'), where('id', '==', id));
     const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) {
-      return "https://www.gravatar.com/avatar/";
-    }
-    const docSnap = querySnapshot.docs[0];
-    return docSnap.exists() ? docSnap.data().avatar : "https://www.gravatar.com/avatar/";
+    if (querySnapshot.empty) return "https://www.gravatar.com/avatar/";
+    return querySnapshot.docs[0].data().avatar;
   };
 
   // Fetch profiles based on search query
@@ -148,10 +177,10 @@ const ChatInterface = () => {
       const q = query(profilesRef, where('username', '>=', searchQuery), where('username', '<=', searchQuery + '\uf8ff'));
       const querySnapshot = await getDocs(q);
       const fetchedProfiles = querySnapshot.docs.map((doc) => ({
-        id: (doc.data() as Profile).id, // Use the `id` field from the `profiles` collection
-        username: (doc.data() as Profile).username,
+        id: doc.data().id,
+        username: doc.data().username,
         avatar: doc.data().avatar,
-      })) as Profile[];
+      }));
       setProfiles(fetchedProfiles);
     } catch (err) {
       console.error('Error fetching profiles:', err);
@@ -175,7 +204,7 @@ const ChatInterface = () => {
 
       if (existingConversation) {
         setOpenedConversation(existingConversation.id);
-        setShowProfileSearch(false); // Close the profile search
+        setShowProfileSearch(false);
         return;
       }
 
@@ -193,15 +222,11 @@ const ChatInterface = () => {
 
   // Get the receiver ID for the opened conversation
   const getReceiverId = async () => {
-    if (!openedConversation) {
-      throw new Error('No conversation is opened');
-    }
+    if (!openedConversation) throw new Error('No conversation is opened');
     const docRef = doc(db, 'conversations', openedConversation);
     const docSnap = await getDoc(docRef);
     const data = docSnap.data();
-    const receiverId = data?.participants.find((participant: string) => participant !== currentUser.uid);
-    console.log(receiverId);
-    return receiverId;
+    return data?.participants.find((participant: string) => participant !== currentUser.uid);
   };
 
   // Send a new message to the opened conversation
@@ -216,7 +241,6 @@ const ChatInterface = () => {
         timestamp: Timestamp.now(),
         conversationId: openedConversation,
       });
-
       setNewMessage('');
     } catch (err) {
       console.error('Error sending message:', err);
@@ -231,29 +255,20 @@ const ChatInterface = () => {
 
   // Fetch messages when the opened conversation changes
   useEffect(() => {
-    if (openedConversation) {
-      fetchMessages(openedConversation);
-    } else {
-      setMessages([]); // Clear messages if no conversation is opened
-    }
+    if (openedConversation) fetchMessages(openedConversation);
+    else setMessages([]);
   }, [openedConversation]);
 
   // Fetch profiles when the search query changes
   useEffect(() => {
-    if (searchQuery.trim() !== '') {
-      fetchProfiles(searchQuery);
-    } else {
-      setProfiles([]); // Clear profiles if the search query is empty
-    }
+    if (searchQuery.trim() !== '') fetchProfiles(searchQuery);
+    else setProfiles([]);
   }, [searchQuery]);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
     <div className="flex h-[calc(100vh-6.7vh)] bg-[#2A2E35] relative">
-      {/* Mobile Menu Button */}
       <button
         onClick={toggleSidebar}
         className="lg:hidden absolute top-4 left-4 z-50 text-white p-2 rounded-lg bg-[#363B44] hover:bg-[#404650]"
@@ -261,7 +276,6 @@ const ChatInterface = () => {
         {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Sidebar */}
       <div
         className={`
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -332,8 +346,8 @@ const ChatInterface = () => {
                   ))}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm text-gray-200">Message Header</div>
-                  <div className="text-xs text-gray-400 truncate">Lorem ipsum text...</div>
+                  <div className="text-sm text-gray-200">{conversation.senderUsername}</div>
+                  <div className="text-xs text-gray-400 truncate">{conversation.lastMessage}</div>
                 </div>
               </div>
             ))}
@@ -341,16 +355,13 @@ const ChatInterface = () => {
         </div>
       </div>
 
-      {/* Chat Area */}
       <div className="flex-1 flex flex-col w-full lg:w-auto">
-        {/* Chat header */}
         <div className="p-4 ">
           <div className="text-center text-gray-400 text-sm pl-12 lg:pl-0">
             End-to-end encryption
           </div>
         </div>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 lg:p-6" ref={messageContainerRef}>
           <div className="space-y-4 max-w-3xl mx-auto">
             {messages.map((message) => (
@@ -381,39 +392,39 @@ const ChatInterface = () => {
           </div>
         </div>
 
-        {/* Message Input */}
-        <div className="p-4 bg-[#2A2E35]">
-          <div className="flex items-center max-w-3xl mx-auto">
-            <input
-              type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type message Here ..."
-              className="flex-1 bg-[#363B44] text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-1 focus:ring-[#4B9B9B]"
-            />
-            <button
-              onClick={sendMessage}
-              className="ml-2 p-3 bg-[#4B9B9B] text-white rounded-lg hover:bg-[#408B8B] flex-shrink-0"
-            >
-              <svg
-                className="w-5 h-5 rotate-90"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+        {openedConversation && (
+          <div className="p-4 bg-[#2A2E35]">
+            <div className="flex items-center max-w-3xl mx-auto">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type message Here ..."
+                className="flex-1 bg-[#363B44] text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-1 focus:ring-[#4B9B9B]"
+              />
+              <button
+                onClick={sendMessage}
+                className="ml-2 p-3 bg-[#4B9B9B] text-white rounded-lg hover:bg-[#408B8B] flex-shrink-0"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="w-5 h-5 rotate-90"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Overlay for mobile */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
