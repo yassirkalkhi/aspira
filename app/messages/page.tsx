@@ -240,23 +240,36 @@ const ChatInterface = () => {
   };
 
   // Send a new message to the opened conversation
-  const sendMessage = async () => {
-    if (newMessage.trim() === '' || !openedConversation) return;
-    const receiverId = await getReceiverId();
-    try {
-      await addDoc(collection(db, 'messages'), {
-        senderId: currentUser.uid,
-        receiverId: receiverId,
-        content: newMessage,
-        timestamp: Timestamp.now(),
-        conversationId: openedConversation,
-      });
-      setNewMessage('');
-    } catch (err) {
-      console.error('Error sending message:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    }
-  };
+ const sendMessage = async () => {
+  if (newMessage.trim() === '' || !openedConversation) return;
+  const receiverId = await getReceiverId();
+  
+  try {
+    // Send the message
+    const messageRef = await addDoc(collection(db, 'messages'), {
+      senderId: currentUser.uid,
+      receiverId: receiverId,
+      content: newMessage,
+      timestamp: Timestamp.now(),
+      conversationId: openedConversation,
+    });
+
+    // Create notification
+    const senderName =  currentUser.email.split('@')[0] || 'Someone';
+    await addDoc(collection(db, 'notifications'), {
+      content: newMessage,
+      header: `New message from ${senderName}`,
+      receiveId: receiverId,
+      time: Timestamp.now(),
+      read: false,
+    });
+
+    setNewMessage('');
+  } catch (err) {
+    console.error('Error sending message:', err);
+    setError(err instanceof Error ? err.message : 'An error occurred');
+  }
+};
 
   // Fetch conversations when the component mounts
   useEffect(() => {

@@ -50,11 +50,11 @@ const RenderUserComment: React.FC<RenderUserCommentProps> = ({ uid, commentConte
         </div>
     ) : (
         <div key={user?.uid} className="mb-4">
-          <div className="flex gap-2 mb-2">
-          <img src={user?.AvatarURL} alt="user photo" width={20}  className="rounded-full" />
+          <div className="flex gap-2">
+          <div className="h-6 w-6 rounded-full object-cover bg-center bg-cover" style={{backgroundImage: `url(${user?.AvatarURL|| "https://lh3.googleusercontent.com/a/ACg8ocLq2rzclet439QDaQyxEMOibEjv8Govpm4EPsbgqDaFxHOpIg=s96-c"})`}}></div>
           <span className="text-sm font-semibold text-theme-primary/80">{user?.username}</span>
           </div>
-          <div className="ms-4">
+          <div className="ms-5">
               <span className="text-sm text-white/80 mt-1  break-words">
             {commentContent}
             </span>

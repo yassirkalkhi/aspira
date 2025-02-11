@@ -6,21 +6,18 @@ import { MessageSquare, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
-import { getSession } from "@/sessions/sessions";
+import { listenForAuthChanges } from "@/features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "@/redux/store";
 
 const MessagesList = () => {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  
   useEffect(() => {
-    getSession().then((session) => {
-      console.log(session);
-      if (session) {
-        setCurrentUser({ uid: session.id, email: session.email });
-      }else{
-        setCurrentUser(null);
-      }
-    });
-  }, []);
- 
+      dispatch(listenForAuthChanges());
+        }, [dispatch]);
+  const currentUser = useSelector((state: { auth: { user: any } }) => state.auth.user);
+
  
   const router = useRouter();
   const [messages, setMessages] = useState<any[]>([]);
@@ -87,7 +84,7 @@ const MessagesList = () => {
           className="flex items-center gap-3 mb-4 cursor-pointer hover:bg-dark-secondary p-2 rounded-lg transition-colors"
         >
           <div className="relative">
-            <img src={message.senderAvatar || "https://lh3.googleusercontent.com/a/ACg8ocLq2rzclet439QDaQyxEMOibEjv8Govpm4EPsbgqDaFxHOpIg=s96-c"} alt="User" className="h-8 w-8 rounded-full object-cover" />
+            <div className="h-8 w-8 rounded-full object-cover bg-center bg-cover" style={{backgroundImage: `url(${message.senderAvatar || "https://lh3.googleusercontent.com/a/ACg8ocLq2rzclet439QDaQyxEMOibEjv8Govpm4EPsbgqDaFxHOpIg=s96-c"})`}}></div>
             <span className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ${message.senderIsOnline ? 'bg-[#238636]' : 'bg-gray-500'}`} />
           </div>
           <div className="flex-1 min-w-0">
