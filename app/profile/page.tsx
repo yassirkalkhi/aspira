@@ -4,11 +4,15 @@ import { UserData, Project, Post } from '@/types/types';
 import { MapPin, Mail, Link as LinkIcon, Calendar, Edit, Plus, Briefcase, Github, ExternalLink, Save, ThumbsUp, Loader, RotateCcw } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { db } from '@/lib/firebase';
-import { collection, doc, getDoc, getDocs, query, updateDoc, where, Timestamp, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, updateDoc, where, Timestamp } from 'firebase/firestore';
 import renderPostAlert from '@/components/ui/Posts/PostParts/PostAlert';
 import renderFollowButton from '@/components/ui/Posts/PostParts/PostFollowButton';
 import renderPostContent from '@/components/ui/Posts/PostParts/PostContent';
 import Actions from '@/components/ui/Posts/PostActions';
+import withAuth from '@/components/auth/withAuth';
+import { useDispatch, useSelector } from 'react-redux';
+import { listenForAuthChanges } from '@/features/auth/authSlice';
+import { AppDispatch } from '@/redux/store';
 
 
 const defaultImages = {
@@ -22,15 +26,17 @@ const Profile = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [isOwnProfile, setIsOwnProfile] = useState(true);
   const [editedData, setEditedData] = useState<Partial<UserData>>({});
   const [newSkill, setNewSkill] = useState('');
+  const dispatch = useDispatch<AppDispatch>()
+  const currentUser = useSelector((state: { auth: { user: any } }) => state.auth.user)
   
-  const currentUser = {
-    uid : "5UFmay1soARhvs7SZwS0mn5l1q93",
-    username: 'yasserkalkhi',
-  };
 
+   useEffect(() => {
+      dispatch(listenForAuthChanges());
+    }, [dispatch]);
+   
+ 
   const fetchUserData = async () => {
     if (!currentUser?.uid) {
       toast.error('User not logged in or no UID available', {
@@ -54,7 +60,7 @@ const Profile = () => {
         }
   
         const processedData: UserData = {
-          id: doc.id,
+          id: userData.id,
           username: userData.username || '',
           avatar: userData.avatar || defaultImages.avatar,
           cover: userData.cover || defaultImages.cover,
@@ -73,16 +79,20 @@ const Profile = () => {
           about: userData.about || '',
           skills: userData.skills || [],
         };
-  
+     
         setUser(processedData);
         setEditedData(processedData);
+        
       } else {
         setUser(null);
         toast.error('No profile found for this account', {
           duration: 4000,
           position: 'bottom-right',
         });
+        
       }
+
+      
     } catch (err) {
       console.error(err);
       toast.error('Failed to fetch user data, Please try again', {
@@ -99,36 +109,38 @@ const Profile = () => {
  const fetchUserPosts = async()=>{
      setPosts([]);
      try{
-      const q = query(collection(db,'posts'),where('author.id','==',currentUser.uid));
+      const q = query(collection(db,'posts'),where('author.id','==',currentUser?.uid));
       const posts = await getDocs(q);
       
-      posts.forEach((p)=>{
-               const data = p.data()
-               const post = {
-                id: p.id,
-                source : data.source,
-                author: {
-                  name: data.author.name,
-                  avatar: data.author.avatar,
-                  title:data.author.title,
-                  id : data.author.id,
-                },
-                content: data.content,
-                medias : data.medias,
-                timestamp: data.timestamp
-                        ? data.timestamp.toDate().toLocaleString('en-US', {
-                              month: '2-digit',
-                              day: '2-digit',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                          })
-                        : 'Just now',
-                likes: data.like,
-                comments: data.comments ,
-                shares: data.shares,
-               }
-               setPosts(prevPosts => [...prevPosts,post])
-      })
+      const newPosts: Post[] = [];
+      posts.forEach((p) => {
+        const data = p.data();
+        const post = {
+          id: p.id,
+          source: data.source,
+          author: {
+            name: data.author.name,
+            avatar: data.author.avatar,
+            title: data.author.title,
+            id: data.author.id,
+          },
+          content: data.content,
+          medias: data.medias,
+          timestamp: data.timestamp
+            ? data.timestamp.toDate().toLocaleString('en-US', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+              })
+            : 'Just now',
+          likes: data.like,
+          comments: data.comments,
+          shares: data.shares,
+        };
+        newPosts.push(post);
+      });
+      setPosts(newPosts);
      }catch(e){
            toast.error('Error getting user Posts')
      }
@@ -136,12 +148,12 @@ const Profile = () => {
 
 
 
-  useEffect(() => {
-    if (currentUser.username) {
-      fetchUserData();
-      fetchUserPosts()}
-  }, [currentUser.username]);
-
+ useEffect(() => {
+  if (currentUser?.uid) {
+    fetchUserData();
+    fetchUserPosts();
+  }
+}, [currentUser]);
 
 
 
@@ -171,7 +183,7 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
-      const q = query(collection(db, 'profiles'), where('username', '==', currentUser.username));
+      const q = query(collection(db, 'profiles'), where('username', '==', user?.username));
       const querySnapshot = await getDocs(q);
       
       if (!querySnapshot.empty) {
@@ -188,10 +200,26 @@ const Profile = () => {
         toast.success('Profile updated successfully!');
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
       toast.error('Failed to update profile');
     }
   };
+
+  useEffect(() => {
+    if(user && (
+      (user.about?.length || 0) < 1 ||
+      (user.bio?.length || 0) < 1 ||
+      (user.company?.length || 0) < 1 ||
+      (user.location?.length || 0) < 1 ||
+      (user.position?.length || 0) < 1 ||
+      (user.skills?.length || 0) < 1 ||
+      (user.website?.length || 0) < 1
+    )) {
+      toast.success("Please proceed to complete your profile by clicking edit profile", {
+        duration: 10000,
+      });
+    }
+ 
+  }, [user]);
 
   if (loading) {
     return (
@@ -219,31 +247,31 @@ const Profile = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-secondary p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-dark-secondary p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Profile Header */}
-        <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="bg-dark-primary rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
           <div 
             className="h-48 sm:h-64 w-full rounded-t-lg relative bg-cover bg-center"
             style={{ backgroundImage: `url(${coverImage})` }}
           >
             <div className="absolute inset-0 bg-black/70 rounded-t-lg"></div>
-            {isOwnProfile && (
+           
               <button
                 onClick={isEditing ? handleSave : () => setIsEditing(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#242424] text-gray-700 dark:text-gray-300 absolute bottom-4 right-4 z-10"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 border border-gray-700 hover:bg-[#242424] text-gray-300 absolute bottom-4 right-4 z-10"
               >
                 {isEditing ? <Save className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
                 {isEditing ? 'Save Profile' : 'Edit Profile'}
               </button>
-            )}
+            
           </div>
 
           <div className="px-4 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between relative">
               <div className="flex items-end -mt-16 sm:-mt-20 mb-4 sm:mb-6">
-                <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-full border-4 border-white dark:border-[#1a1a1a] 
-                             bg-white dark:bg-[#242424] overflow-hidden shadow-lg relative z-20">
+                <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-full border-4 border-[#1a1a1a] 
+                             bg-[#242424] overflow-hidden shadow-lg relative z-20">
                   <img 
                     src={userImage}
                     alt={user.username}
@@ -255,7 +283,7 @@ const Profile = () => {
             
             <div className="space-y-4 pb-6">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                <h1 className="text-2xl font-bold text-gray-100">
                   {isEditing ? (
                     <input
                       type="text"
@@ -274,7 +302,7 @@ const Profile = () => {
                     className="w-full text-white/80 p-2 border rounded-lg bg-dark-secondary"
                   />
                 ) : (
-                  <p className="text-gray-600 dark:text-gray-400">{user.bio}</p>
+                  <p className="text-gray-400">{user.bio}</p>
                 )}
               </div>
 
@@ -299,7 +327,7 @@ const Profile = () => {
                 ) : (
                   <>
                     {user.position && user.company && (
-                      <span className="text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                      <span className="text-gray-400 flex items-center gap-1">
                         <Briefcase className="h-4 w-4" />
                         {user.position} at {user.company}
                       </span>
@@ -341,11 +369,11 @@ const Profile = () => {
               </div>
 
               <div className="flex gap-4">
-                <span className="text-gray-600 dark:text-gray-400">
-                  <strong className="text-gray-900 dark:text-gray-100">{user.following}</strong> Following
+                <span className="text-gray-400">
+                  <strong className="text-gray-100">{user.following}</strong> Following
                 </span>
-                <span className="text-gray-600 dark:text-gray-400">
-                  <strong className="text-gray-900 dark:text-gray-100">{user.followers}</strong> Followers
+                <span className="text-gray-400">
+                  <strong className="text-gray-100">{user.followers}</strong> Followers
                 </span>
               </div>
             </div>
@@ -353,7 +381,7 @@ const Profile = () => {
         </div>
 
         {/* Tabs Navigation */}
-        <div className="border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-gray-50 dark:bg-dark-primary z-10 py-2 rounded-lg  px-6 pt-6">
+        <div className="border-b border-gray-800 sticky top-0 bg-dark-primary z-10 py-2 rounded-lg  px-6 pt-6">
           <nav className="flex gap-6">
             {tabs.map(tab => (
               <button
@@ -361,20 +389,20 @@ const Profile = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`pb-4 relative ${
                   activeTab === tab.id
-                    ? 'text-gray-900 dark:text-gray-100'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                    ? 'text-gray-100'
+                    : 'text-gray-400 hover:text-gray-200'
                 }`}
               >
                 <span className="flex items-center gap-2">
                   {tab.label}
                   {(tab.count ?? 0) > 0 && (
-                    <span className="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-theme-primary text-gray-600 dark:text-white/80">
+                    <span className="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full bg-theme-primary text-white/80">
                       {tab.count}
                     </span>
                   )}
                 </span>
                 {activeTab === tab.id && (
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-black dark:bg-white" />
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-white" />
                 )}
               </button>
             ))}
@@ -435,7 +463,7 @@ const Profile = () => {
                         </div>
 
                         {/* Action Buttons */}
-                       <Actions postId={post.id}  userId='5UFmay1soARhvs7SZwS0mn5l1q93'></Actions>
+                       <Actions postId={post.id}  userId={currentUser?.uid}></Actions>  
                     </div>
                 </div>
             ))}
@@ -449,7 +477,7 @@ const Profile = () => {
             </div>
           )}
           {activeTab === 'about' && (
-            <div className="bg-white dark:bg-dark-primary rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="bg-dark-primary rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6">
               {isEditing ? (
                 <textarea
                   value={editedData.about || ''}
@@ -464,7 +492,7 @@ const Profile = () => {
                       About 
                     </h3>
                     <div className="space-y-4">
-                      <p className="text-gray-600 dark:text-gray-400">
+                      <p className="text-gray-400">
                         {user.about}
                       </p>
                     </div>
@@ -472,7 +500,7 @@ const Profile = () => {
                 )
               )}
               <div className="mt-6">
-                <h4 className="text-gray-900 dark:text-gray-100 font-semibold mb-2">
+                <h4 className="text-gray-100 font-semibold mb-2">
                   Skills
                 </h4>
                 {isEditing ? (
@@ -493,8 +521,8 @@ const Profile = () => {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {editedData.skills?.map((skill, index) => (
-                        <div key={index} className="flex items-center gap-1 bg-gray-100 dark:bg-theme-primary px-2 py-1 rounded-full">
-                          <span className="text-gray-600 dark:text-white/80">{skill}</span>
+                        <div key={index} className="flex items-center gap-1 bg-theme-primary px-2 py-1 rounded-full">
+                          <span className="text-white/80">{skill}</span>
                           <button 
                             onClick={() => handleSkillRemove(index)}
                           >
@@ -507,7 +535,7 @@ const Profile = () => {
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {user.skills.map((skill, index) => (
-                      <span key={index} className="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-theme-primary text-gray-600 dark:text-white/80">
+                      <span key={index} className="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-full bg-theme-primary text-white/80">
                         {skill}
                       </span>
                     ))}
@@ -523,7 +551,7 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default withAuth(Profile);
 
 /// profile  
 /// everything elese done

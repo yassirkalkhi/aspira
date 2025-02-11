@@ -1,20 +1,39 @@
 import { Timestamp } from "firebase/firestore";
 
 export interface User {
-    uid : string,
-    AvatarURL : string,
-    createdAt : Timestamp,
-    email : string,
-    firstName : string,
-    isOnline : boolean,
-    lastName : string,
-    role : string ,
-    username : string,
-    hasProfile : boolean
+  uid: string;
+  email: string;
+  firstname: string;
+  lastname: string;
+  username: string;
+  role: string;
+  isOnline: boolean;
+  createdAt: Timestamp;
+  hasProfile: boolean;
 }
 
 
-
+export interface Profile {
+  id: string;
+  userId: string;
+  username: string;
+  firstname: string;
+  lastname: string;
+  location: string;
+  position: string;
+  company: string;
+  role: string;
+  bio: string;
+  about: string;
+  skills: string[];
+  website: string;
+  followers: number;
+  following: number;
+  joinDate: Timestamp;
+  avatar: string;
+  cover: string;
+  isOnline: boolean;
+}
 
  export interface Message {
     id: string;

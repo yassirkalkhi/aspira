@@ -7,12 +7,23 @@ import Actions from './PostActions';
 import renderPostContent from './PostParts/PostContent';
 import renderPostAlert from './PostParts/PostAlert';
 import renderFollowButton from './PostParts/PostFollowButton';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '@/redux/store';
+import { listenForAuthChanges } from '@/features/auth/authSlice';
 
 const PostsList = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
-    
+    const dispatch = useDispatch<AppDispatch>()
+
+     useEffect(() => {
+        dispatch(listenForAuthChanges());
+      }, [dispatch]);
+
+      const { user } = useSelector((state: { auth: { user: any } }) => state.auth);
+  
+
 
     const formatNumber = (num: number) => {
         if (num >= 1000000) {
@@ -132,7 +143,7 @@ const PostsList = () => {
                         </div>
 
                         {/* Action Buttons */}
-                       <Actions postId={post.id}  userId='5UFmay1soARhvs7SZwS0mn5l1q93'></Actions>
+                       <Actions postId={post.id}  userId={user?.uid}></Actions>
                     </div>
                 </div>
             ))}

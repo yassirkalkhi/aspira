@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { User } from "@/types/types";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/shadcn/ui/skeleton"; 
 import React from "react";
 
@@ -11,21 +10,25 @@ interface RenderUserCommentProps {
 }
 
 const RenderUserComment: React.FC<RenderUserCommentProps> = ({ uid, commentContent }) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<any | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     useEffect(() => {
         const fetchUserData = async () => {
             setLoading(true);
             try {
-                const userRef = doc(db, "users", uid);
-                const userSnap = await getDoc(userRef);
-                if (userSnap.exists()) {
-                    const data = userSnap.data();
+                const userRef = query(
+                    collection(db, "profiles"), 
+                    where("id", "==", uid)
+                );
+                const userSnap = await getDocs(userRef);
+                if (!userSnap.empty) {
+                    const userDoc = userSnap.docs[0];
+                    const data = userDoc.data();
                     setUser({
-                        uid: userSnap.id,
+                        uid: userDoc.id,
                         username: data?.username,
-                        AvatarURL: data?.AvatarURL
-                    } as User);
+                        AvatarURL: data?.avatar
+                    } as any);
                 }
             } catch (error) {
                 console.error("Error fetching user data:", error);

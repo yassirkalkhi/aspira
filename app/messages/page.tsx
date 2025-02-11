@@ -4,6 +4,9 @@ import { Message } from '@/types/types';
 import { collection, query, where, onSnapshot, orderBy, Timestamp, addDoc, getDoc, doc, getDocs, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Menu, X, Search } from 'lucide-react';
+import { getSession } from '@/sessions/sessions';
+import { useRouter } from 'next/navigation';
+import withAuth from '@/components/auth/withAuth';
 
 interface Profile {
   id: string;
@@ -29,16 +32,24 @@ const ChatInterface = () => {
   const [showProfileSearch, setShowProfileSearch] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [avatars, setAvatars] = useState<{ [key: string]: string }>({});
-
-  const currentUser = {
-    uid: '5UFmay1soARhvs7SZwS0mn5l1q93',
-    username: 'yasserkalkhi',
-  };
-
+  const [avatars, setAvatars] = useState<{ [key: string]: string }>({}); 
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageContainerRef = useRef<HTMLDivElement>(null);
+  const Router = useRouter();
 
+  useEffect(() => {
+    getSession().then((session) => {
+      console.log(session);
+      if (session) {
+        setCurrentUser({ uid: session.id, email: session.email });
+      }else{
+        Router.push('/')
+      }
+    });
+  }, []);
+
+  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -87,7 +98,7 @@ const ChatInterface = () => {
     try {
       const q = query(
         collection(db, 'conversations'),
-        where('participants', 'array-contains', currentUser.uid)
+        where('participants', 'array-contains', currentUser?.uid)
       );
 
       const unsubscribe = onSnapshot(
@@ -119,7 +130,6 @@ const ChatInterface = () => {
 
       return () => unsubscribe();
     } catch (err) {
-      console.error('Error setting up listener:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
       setLoading(false);
     }
@@ -226,7 +236,7 @@ const ChatInterface = () => {
     const docRef = doc(db, 'conversations', openedConversation);
     const docSnap = await getDoc(docRef);
     const data = docSnap.data();
-    return data?.participants.find((participant: string) => participant !== currentUser.uid);
+    return data?.participants.find((participant: string) => participant !== currentUser?.uid);
   };
 
   // Send a new message to the opened conversation
@@ -251,7 +261,7 @@ const ChatInterface = () => {
   // Fetch conversations when the component mounts
   useEffect(() => {
     fetchConversations();
-  }, [currentUser.uid]);
+  }, [currentUser?.uid]);
 
   // Fetch messages when the opened conversation changes
   useEffect(() => {
@@ -435,4 +445,4 @@ const ChatInterface = () => {
   );
 };
 
-export default ChatInterface;
+export default withAuth(ChatInterface);

@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import MessagesList from '@/components/ui/Messages/MessagesList';
 import {popularJobs, trending} from '@/data/mockData'
 import PostsList from '@/components/ui/Posts/PostsList';
@@ -7,8 +7,18 @@ import PopularJobs from '@/components/ui/Jobs/PopularJobs';
 import Links from '@/components/ui/Links/Links';
 import AddPost from '@/components/ui/Posts/AddPost';
 import TrendingTopics from '@/components/ui/Jobs/Trending';
+import withAuth from '@/components/auth/withAuth';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/redux/store';
+import { listenForAuthChanges } from '@/features/auth/authSlice';
 
-export default function Home() {
+ function Home() {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    dispatch(listenForAuthChanges());
+  }, [dispatch]);
+
   
   return (
     <>
@@ -44,3 +54,5 @@ export default function Home() {
     </>
   );
 }
+
+export default withAuth(Home);

@@ -9,12 +9,17 @@ import { Skeleton } from '@/components/ui/shadcn/ui/skeleton';
 import PostJobSection from '@/components/ui/Jobs/PostJobModal';
 import ApplyModal from '@/components/ui/Jobs/ApplyModal';
 import MessagesList from '@/components/ui/Messages/MessagesList';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '@/redux/store';
+import { listenForAuthChanges } from '@/features/auth/authSlice';
 
 const Jobs = () => {
-    const user = {
-        uid: "id1",
-        photoURL: "https://example.com/photo.jpg" 
-    }; 
+    
+    const dispatch = useDispatch<AppDispatch>();
+    useEffect(() => {
+      dispatch(listenForAuthChanges());
+    }, [dispatch]);
+
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [locationQuery, setLocationQuery] = useState<string>('');
     const [jobs, setJobs] = useState<Job[]>([]);

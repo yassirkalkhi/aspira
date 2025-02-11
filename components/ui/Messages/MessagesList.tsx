@@ -6,14 +6,27 @@ import { MessageSquare, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
+import { getSession } from "@/sessions/sessions";
 
 const MessagesList = () => {
-  const currentUser = { uid: '5UFmay1soARhvs7SZwS0mn5l1q93' };
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  useEffect(() => {
+    getSession().then((session) => {
+      console.log(session);
+      if (session) {
+        setCurrentUser({ uid: session.id, email: session.email });
+      }else{
+        setCurrentUser(null);
+      }
+    });
+  }, []);
+ 
+ 
   const router = useRouter();
   const [messages, setMessages] = useState<any[]>([]);
 
   const messagesRef = collection(db, "messages");
-  const q = currentUser?.uid && query(messagesRef,where("receiverId", "==", currentUser.uid),orderBy('timestamp', 'desc'),limit(6));
+  const q = currentUser?.uid && query(messagesRef,where("receiverId", "==", currentUser?.uid),orderBy('timestamp', 'desc'),limit(6));
   const [messagesSnapshot, messagesLoading, messagesError] = useCollection(q || null);
 
   useEffect(() => {
@@ -60,10 +73,10 @@ const MessagesList = () => {
           <MessageSquare className="h-5 w-5" />
         </Link>
       </div>
-      {!currentUser.uid && <p className="text-gray-400">Sign in to view messages.</p>}
+      {!currentUser && <p className="text-gray-400">Sign in to view messages.</p>}
       {messagesLoading && <p className="text-gray-400">Loading messages...</p>}
       {messagesError && <p className="text-red-500">Error Getting messages !</p>}
-      {messages.length === 0 && !messagesLoading && (
+      {messages.length === 0 && currentUser && !messagesLoading && (
         <p className="text-gray-400">No messages found.</p>
       )}
 
@@ -74,7 +87,7 @@ const MessagesList = () => {
           className="flex items-center gap-3 mb-4 cursor-pointer hover:bg-dark-secondary p-2 rounded-lg transition-colors"
         >
           <div className="relative">
-            <img src={message.senderAvatar || "https://picsum.photos/20"} alt="User" className="h-8 w-8 rounded-full object-cover" />
+            <img src={message.senderAvatar || "https://lh3.googleusercontent.com/a/ACg8ocLq2rzclet439QDaQyxEMOibEjv8Govpm4EPsbgqDaFxHOpIg=s96-c"} alt="User" className="h-8 w-8 rounded-full object-cover" />
             <span className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ${message.senderIsOnline ? 'bg-[#238636]' : 'bg-gray-500'}`} />
           </div>
           <div className="flex-1 min-w-0">
