@@ -4,7 +4,10 @@ import instantsearch from 'instantsearch.js';
 import { searchBox, hits, configure, index } from 'instantsearch.js/es/widgets';
 import { Search } from 'lucide-react';
 
-const searchClient = algoliasearch('A4L8O9LLGY', '0dc5543b7404eb77bc692b36f9c921b4');
+const searchClient = algoliasearch(
+  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || '',
+  process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || ''
+);
 
 const Algolia = () => {
   const searchRef = useRef(null);
