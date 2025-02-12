@@ -1,6 +1,6 @@
 {
   "name": "aspira",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -9,17 +9,22 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.0",
     "@radix-ui/react-dialog": "^1.1.5",
     "@radix-ui/react-scroll-area": "^1.2.2",
+    "@radix-ui/react-slot": "^1.1.2",
     "@reduxjs/toolkit": "^2.5.1",
     "algoliasearch": "^5.20.1",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "embla-carousel-autoplay": "^8.5.2",
+    "embla-carousel-react": "^8.5.2",
     "firebase": "^11.3.0",
     "firebase-admin": "^13.0.2",
     "framer-motion": "^12.0.6",
+    "glob": "^11.0.1",
     "instantsearch.js": "^4.77.3",
     "lucide-react": "^0.474.0",
     "mkdirp": "^3.0.1",
@@ -33,6 +38,7 @@
     "react-toastify": "^11.0.3",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^11.0.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {

@@ -1,12 +1,11 @@
 "use client";
 
-import React, {  useState } from 'react';
-import { checkSession } from '@/sessions/sessions';
+import React, {  useEffect, useState } from 'react';
 import {useRouter} from 'next/navigation'
 import toast, { Toaster } from 'react-hot-toast';
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from '@/redux/store';
-import { loginWithGoogle, loginUser } from '@/features/auth/authSlice';
+import { loginWithGoogle, loginUser, listenForAuthChanges } from '@/features/auth/authSlice';
 import Link from 'next/link';
 
 
@@ -18,16 +17,19 @@ const LoginPage: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const Router = useRouter();
 
-        const initializeAuth = async () => {
-            const session = await checkSession();
-            console.log(session)
-            if(session){
-                Router.push('/')
-            }else{
-              setIslogged(true)
-            }
-        };
-        initializeAuth();
+    useEffect(() => {
+        dispatch(listenForAuthChanges());
+    }, [dispatch]);
+
+    const user = useSelector((state: { auth: { user: any } }) => state.auth.user);
+    useEffect(() => {
+        console.log(user);
+        if (user) {
+            Router.push('/');
+        } else {
+            setIslogged(true);
+        }
+    }, [ Router]);
 
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

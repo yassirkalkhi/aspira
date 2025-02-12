@@ -1,26 +1,33 @@
-import React, { useState } from 'react'
+'use client'
+import React, { useEffect, useState } from 'react'
 import { collection, addDoc, Timestamp, updateDoc, increment, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { AppDispatch } from '@/redux/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { listenForAuthChanges } from '@/features/auth/authSlice';
 
-const ApplyModal = ({ setIsApplicationModalOpen,isApplicationModalOpen ,currentJobId, setError }: { setIsApplicationModalOpen: (isOpen: boolean) => void,isApplicationModalOpen : boolean, currentJobId: string | null, setError: (error: string) => void }) => {
+const ApplyModal = ({ setIsApplicationModalOpen,isApplicationModalOpen ,currentJobId }: { setIsApplicationModalOpen: (isOpen: boolean) => void,isApplicationModalOpen : boolean, currentJobId: string | null}) => {
     const [name, setName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [motivationLetter, setMotivationLetter] = useState<string>('');
-    
-    const user = {
-        uid: "id1",
-        photoURL: "https://example.com/photo.jpg" 
-    }; 
+    const dispatch = useDispatch<AppDispatch>()
+       useEffect(() => {
+          dispatch(listenForAuthChanges());
+        }, [dispatch]);
+     const user = useSelector((state: { auth: { user: any } }) => state.auth.user)
+      
+
         // Handle job application
         const handleApply = async () => {
             if (!user || !currentJobId) {
-                setError('You must be logged in to apply for a job.');
+                toast.error('You must be logged in to apply for a job.');
                 return;
             }
             if (!name || !email || !motivationLetter) {
-                setError('All fields are required.');
+                toast.error('All fields are required.');
                 return;
             }
             try {
@@ -30,7 +37,6 @@ const ApplyModal = ({ setIsApplicationModalOpen,isApplicationModalOpen ,currentJ
                     name,
                     email,
                     motivationLetter,
-                    avatar: user.photoURL,
                     appliedAt: Timestamp.now(),
                 });
                 await updateDoc(doc(db,'jobs',currentJobId),{
@@ -40,9 +46,9 @@ const ApplyModal = ({ setIsApplicationModalOpen,isApplicationModalOpen ,currentJ
                 setName('');
                 setEmail('');
                 setMotivationLetter('');
-                alert('Application submitted successfully!');
+                toast.success('Application submitted successfully!');
             } catch (err) {
-                setError('Failed to submit application. Please try again.');
+                toast.error('Failed to submit application. Please try again.');
             }
         };
 

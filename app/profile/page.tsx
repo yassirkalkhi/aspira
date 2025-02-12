@@ -29,13 +29,11 @@ const Profile = () => {
   const [editedData, setEditedData] = useState<Partial<UserData>>({});
   const [newSkill, setNewSkill] = useState('');
   const dispatch = useDispatch<AppDispatch>()
-  const currentUser = useSelector((state: { auth: { user: any } }) => state.auth.user)
-  
-
    useEffect(() => {
       dispatch(listenForAuthChanges());
     }, [dispatch]);
-   
+    const currentUser = useSelector((state: { auth: { user: any } }) => state.auth.user)
+  
  
   const fetchUserData = async () => {
     if (!currentUser?.uid) {

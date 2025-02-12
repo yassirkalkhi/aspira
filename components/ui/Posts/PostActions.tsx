@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { doc, getDoc, getDocs, collection, query, where, orderBy, updateDoc, addDoc, deleteDoc,increment,serverTimestamp,setDoc,} from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import Button from '@/components/ui/shadcn/ui/Button';
+import Button from '@/components/ui/Buttons/Button';
 import RenderUserComment from '@/components/ui/Comments/RenderUserComment';
 import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/shadcn/ui/dialog';
 import {ScrollArea} from '@/components/ui/shadcn/ui/scroll-area'
 import { Input } from '@/components/ui/shadcn/ui/input';
 import { Comment } from '@/types/types';
+import toast from 'react-hot-toast';
 
 interface PostStats {
   likes: number;
@@ -20,7 +21,7 @@ interface PostActionsProps {
   userId: string;
 }
 
-const ACTION_COOLDOWN = 500;
+const ACTION_COOLDOWN = 400;
 
 const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
   const [liked, setLiked] = useState<boolean>(false);
@@ -29,7 +30,6 @@ const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState<string>('');
   const [showComments, setShowComments] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
   const [isActionInProgress, setIsActionInProgress] = useState<boolean>(false);
 
 
@@ -53,9 +53,8 @@ const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
         }
         setLiked(likeDoc.exists());
         setShared(shareDoc.exists());
-        setError('');
       } catch {
-        setError('Failed to load post data');
+        toast.error('Failed to load post data');
       }
     };
     fetchStats();
@@ -79,9 +78,8 @@ const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
           })) as Comment  [];
           
           setComments(commentsData);
-          setError('');
         } catch {
-          setError('Failed to load comments');
+          toast.error('Failed to load comments');
         }
       };
       fetchComments();
@@ -93,9 +91,8 @@ const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
     setIsActionInProgress(true);
     try {
       await action();
-      setError('');
     } catch (err) {
-      setError('Action failed. Please try again');
+      toast.error('Action failed. Please try again');
     } finally {
       setTimeout(() => {
         setIsActionInProgress(false);
@@ -154,9 +151,8 @@ const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
       }));
       
       setNewComment('');
-      setError('');
     } catch {
-      setError('Failed to post comment');
+      toast.error('Failed to post comment');
     }
   };
 
@@ -184,11 +180,7 @@ const PostActions: React.FC<PostActionsProps> = ({ postId, userId }) => {
 
   return (
     <>
-      {error && (
-        <div className="p-2 text-sm text-red-500 bg-red-900/10 rounded-lg">
-          {error}
-        </div>
-      )}
+     
     <div className="mt-1 pb-1 pt-1">
       <div className='flex items-center justify-between px-2 mb-2'>
       <button

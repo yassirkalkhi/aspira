@@ -14,7 +14,6 @@ import { listenForAuthChanges } from '@/features/auth/authSlice';
 
  function Home() {
   const dispatch = useDispatch<AppDispatch>();
-
   useEffect(() => {
     dispatch(listenForAuthChanges());
   }, [dispatch]);

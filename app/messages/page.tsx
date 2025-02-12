@@ -4,9 +4,11 @@ import { Message } from '@/types/types';
 import { collection, query, where, onSnapshot, orderBy, Timestamp, addDoc, getDoc, doc, getDocs, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Menu, X, Search } from 'lucide-react';
-import { getSession } from '@/sessions/sessions';
-import { useRouter } from 'next/navigation';
 import withAuth from '@/components/auth/withAuth';
+import toast from 'react-hot-toast';
+import { listenForAuthChanges } from '@/features/auth/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '@/redux/store';
 
 interface Profile {
   id: string;
@@ -25,39 +27,26 @@ const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [openedConversation, setOpenedConversation] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showProfileSearch, setShowProfileSearch] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [avatars, setAvatars] = useState<{ [key: string]: string }>({}); 
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageContainerRef = useRef<HTMLDivElement>(null);
-  const Router = useRouter();
-
+   const dispatch = useDispatch<AppDispatch>();
   useEffect(() => {
-    getSession().then((session) => {
-      console.log(session);
-      if (session) {
-        setCurrentUser({ uid: session.id, email: session.email });
-      }else{
-        Router.push('/')
-      }
-    });
-  }, []);
+      dispatch(listenForAuthChanges());
+    }, [dispatch]);
+   const currentUser = useSelector((state: { auth: { user: any } }) => state.auth.user);
 
-  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   // Fetch messages for the opened conversation
   const fetchMessages = async (conversationId: string) => {
-    setLoading(true);
-    setError(null);
     try {
       const q = query(
         collection(db, 'messages'),
@@ -68,33 +57,28 @@ const ChatInterface = () => {
       const unsubscribe = onSnapshot(
         q,
         (querySnapshot) => {
-          const fetchedMessages = querySnapshot.docs.map((doc) => ({
+          const fetchedMessages = querySnapshot.docs.map((doc) => ({  
             id: doc.id,
             ...doc.data(),
           })) as Message[];
           setMessages(fetchedMessages);
-          setLoading(false);
           scrollToBottom();
         },
         (error) => {
           console.error('Error fetching messages:', error);
-          setError(error.message);
-          setLoading(false);
+          toast.error(error.message);
         }
       );
 
       return () => unsubscribe();
     } catch (err) {
       console.error('Error setting up listener:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      setLoading(false);
+      toast.error(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 
   // Fetch all conversations for the current user
   const fetchConversations = async () => {
-    setLoading(true);
-    setError(null);
     try {
       const q = query(
         collection(db, 'conversations'),
@@ -118,20 +102,17 @@ const ChatInterface = () => {
             })
           );
           setConversations(fetchedConversations);
-          setLoading(false);
           fetchAvatarsForConversations(fetchedConversations);
         },
         (error) => {
           console.error('Error fetching conversations:', error);
-          setError(error.message);
-          setLoading(false);
+          toast.error(error.message);
         }
       );
 
       return () => unsubscribe();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      setLoading(false);
+      toast.error(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 
@@ -194,7 +175,7 @@ const ChatInterface = () => {
       setProfiles(fetchedProfiles);
     } catch (err) {
       console.error('Error fetching profiles:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      toast.error(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 
@@ -226,7 +207,7 @@ const ChatInterface = () => {
       setShowProfileSearch(false);
     } catch (err) {
       console.error('Error creating conversation:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      toast.error(err instanceof Error ? err.message : 'An error occurred');
     }
   };
 
@@ -267,16 +248,18 @@ const ChatInterface = () => {
     setNewMessage('');
   } catch (err) {
     console.error('Error sending message:', err);
-    setError(err instanceof Error ? err.message : 'An error occurred');
+    toast.error(err instanceof Error ? err.message : 'An error occurred');
   }
 };
 
   // Fetch conversations when the component mounts
   useEffect(() => {
-    fetchConversations();
+    if (currentUser?.uid) {
+      fetchConversations();
+    }
   }, [currentUser?.uid]);
 
-  // Fetch messages when the opened conversation changes
+    if (openedConversation && currentUser?.uid) fetchMessages(openedConversation);
   useEffect(() => {
     if (openedConversation) fetchMessages(openedConversation);
     else setMessages([]);

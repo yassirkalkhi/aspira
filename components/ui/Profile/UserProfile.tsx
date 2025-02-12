@@ -2,7 +2,6 @@ import { listenForAuthChanges } from "@/features/auth/authSlice";
 import { db } from "@/lib/firebase";
 import { AppDispatch } from "@/redux/store";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -39,7 +38,7 @@ const UserProfile = () => {
                 <div className="h-full w-full rounded-full object-cover bg-center bg-cover" style={{backgroundImage: `url(${userData?.avatar || "https://lh3.googleusercontent.com/a/ACg8ocLq2rzclet439QDaQyxEMOibEjv8Govpm4EPsbgqDaFxHOpIg=s96-c"})`}}></div>
             </div>
             <span className="text-white mt-2 font-semibold">{userData?.username || "N/A"}</span>
-            <p className="text-sm text-gray-400">{userData?.position  || "N/A"}</p>
+            <p className="text-sm text-gray-400">{userData?.position  || "N/A"} At <span  className="text-sm text-gray-400 font-semibold">{userData?.company  || "N/A"}</span></p>
         </div>
     );
 };

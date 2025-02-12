@@ -10,10 +10,10 @@ import renderFollowButton from './PostParts/PostFollowButton';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
 import { listenForAuthChanges } from '@/features/auth/authSlice';
+import toast from 'react-hot-toast';
 
 const PostsList = () => {
     const [posts, setPosts] = useState<Post[]>([]);
-    const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>()
 
@@ -38,7 +38,6 @@ const PostsList = () => {
     // Fetch Posts function
     const fetchPosts = async () => {
         setLoading(true);
-        setError(null); 
         try {
             const postsRef = collection(db, 'posts');
             const q = query(postsRef, orderBy('timestamp', 'desc'));
@@ -73,14 +72,14 @@ const PostsList = () => {
     
             setPosts(postsData);
         } catch (e: any) {
-            setError("Error getting Posts");
+            toast.error("Error getting Posts");
         } finally {
             setLoading(false);
         }
     };
     
     useEffect(() => {
-        fetchPosts(); // Fetch posts initially
+        fetchPosts(); 
     }, []);
     
 
@@ -93,7 +92,6 @@ const PostsList = () => {
                  <RotateCcw  width={20} />
             </span>
             {posts.length < 0 && !loading && <span>No Posts Available</span>}
-            {error && <span>{error}</span>}
             {loading && <span className='w-full flex items-center justify-center'><Loader  className='animate-spin'/></span>} {/* Loading Indicator */}
     
             {posts.map((post) => (

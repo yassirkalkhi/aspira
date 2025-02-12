@@ -1,20 +1,15 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { UserData, Project, Post } from '@/types/types';
-import { MapPin, Mail, Link as LinkIcon, Calendar, Edit, Plus, Briefcase, Github, ExternalLink, Save, ThumbsUp, Loader, RotateCcw } from 'lucide-react';
+import { UserData, Post } from '@/types/types';
+import { MapPin, Link as LinkIcon, Briefcase, ThumbsUp, Loader } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { db } from '@/lib/firebase';
-import { collection, doc, getDoc, getDocs, query, updateDoc, where, Timestamp, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import renderPostAlert from '@/components/ui/Posts/PostParts/PostAlert';
 import renderFollowButton from '@/components/ui/Posts/PostParts/PostFollowButton';
 import renderPostContent from '@/components/ui/Posts/PostParts/PostContent';
 import Actions from '@/components/ui/Posts/PostActions';
 import { useParams } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch } from '@/redux/store';
-import { listenForAuthChanges } from '@/features/auth/authSlice';
-
-
 const defaultImages = {
   avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
   cover: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1500&h=400&fit=crop",
@@ -28,13 +23,6 @@ const Profile = () => {
   const params = useParams();
   const username = params.username as string;
 
-  const dispatch = useDispatch<AppDispatch>()
-  const currentUser = useSelector((state: { auth: { user: any } }) => state.auth.user)
-  
-
-   useEffect(() => {
-      dispatch(listenForAuthChanges());
-    }, [dispatch]);
 
   
   function formatNumber(number : number) {
@@ -143,7 +131,6 @@ const Profile = () => {
       fetchUserPosts()
     }
   },[user?.id])
-
 
 
   if (loading) {

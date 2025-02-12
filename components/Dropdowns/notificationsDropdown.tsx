@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch } from '@/redux/store'
 import { listenForAuthChanges } from '@/features/auth/authSlice'
-import { getFirestore, collection, query, where, orderBy, onSnapshot } from 'firebase/firestore'
+import {  collection, query, where, orderBy, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
 
@@ -22,17 +22,16 @@ interface Notification {
 const NotificationsDropdown = () => {
   const dispatch = useDispatch<AppDispatch>()
   const Router = useRouter();
-  const user = useSelector((state: { auth: { user: any } }) => state.auth.user)
   const [isOpen, setIsOpen] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
-
   useEffect(() => {
     dispatch(listenForAuthChanges())
   }, [dispatch])
+   const user = useSelector((state: { auth: { user: any } }) => state.auth.user)
+  
 
   useEffect(() => {
     if (!user?.uid) return
-
     const notificationsQuery = query(
       collection(db, 'notifications'),
       where('receiveId', '==', user.uid),

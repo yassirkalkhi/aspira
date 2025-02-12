@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { auth, db } from "@/lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, fetchSignInMethodsForEmail } from "firebase/auth";
 import { createSession } from "@/sessions/sessions";
-import {  doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
+import {  doc, getDoc, setDoc, Timestamp, writeBatch } from "firebase/firestore";
 import { User, Profile } from "@/types/types";
 
 
@@ -125,8 +125,6 @@ export const signupWithEmail = createAsyncThunk(
 );
 
 
-
-
 // Login with Google
 export const loginWithGoogle = createAsyncThunk(
   "auth/loginWithGoogle",
@@ -151,7 +149,6 @@ export const loginWithGoogle = createAsyncThunk(
         email: user.email,
         username: user.displayName || user.email 
       };
-
     } catch (error: any) {
       return rejectWithValue(getFirebaseErrorMessage(error)); 
     }
@@ -169,27 +166,32 @@ export const signupWithGoogle = createAsyncThunk(
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
 
-      const userCredential = await signInWithPopup(auth, provider);
-      const user = userCredential.user;
+      const tempUserCredential = await signInWithPopup(auth, provider);
+      const tempUser = tempUserCredential.user;
 
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnapshot = await getDoc(userDocRef);
-
-      if (userDocSnapshot.exists()) {
-        await signOut(auth);
-        throw new Error("Sign up method already used");
-      }
-
-      if (!user.email) {
+      if (!tempUser.email) {
         await signOut(auth);
         throw new Error("Google account has no email associated.");
       }
 
-      const methods = await fetchSignInMethodsForEmail(auth, user.email);
+      const methods = await fetchSignInMethodsForEmail(auth, tempUser.email);
       if (methods.length > 0) {
+        await signOut(auth);
+        throw new Error("Sign up method already used");
+      }
+
+      const userDocRef = doc(db, "users", tempUser.uid);
+      const userDocSnapshot = await getDoc(userDocRef);
+
+      if (userDocSnapshot.exists()) {
         await signOut(auth);
         throw new Error("Account already exists. Please log in.");
       }
+
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
+
+      const batch = writeBatch(db);
 
       const userData: User = {
         uid: user.uid,
@@ -203,7 +205,7 @@ export const signupWithGoogle = createAsyncThunk(
         hasProfile: true
       };
 
-      await setDoc(doc(db, "users", user.uid), userData);
+      batch.set(doc(db, "users", user.uid), userData);
 
       const profileData: Profile = {
         id: user.uid,
@@ -227,7 +229,9 @@ export const signupWithGoogle = createAsyncThunk(
         isOnline: true
       };
 
-      await setDoc(doc(db, "profiles", user.uid), profileData);
+      batch.set(doc(db, "profiles", user.uid), profileData);
+
+      await batch.commit();
 
       return {
         uid: user.uid,
@@ -236,6 +240,7 @@ export const signupWithGoogle = createAsyncThunk(
       };
 
     } catch (error: any) {
+      await signOut(auth);
       return rejectWithValue(getFirebaseErrorMessage(error)); 
     }
   }

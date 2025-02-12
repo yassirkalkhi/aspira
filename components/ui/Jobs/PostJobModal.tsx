@@ -10,6 +10,7 @@ import SelectField from "./FormParts/SelectField";
 import InputField from "./FormParts/InputField";
 import Checkbox from "./FormParts/Checkbox";
 import TextArea from "./FormParts/Textarea";
+import toast from "react-hot-toast";
 
 
 
@@ -115,6 +116,7 @@ const PostJobSection = () => {
       setFormData(initialFormData)
     } catch (error) {
       console.error("Error posting job:", error);
+      toast.error("Error posting job");
       setErrors({
         submit: "Error posting job. Please try again."
       });

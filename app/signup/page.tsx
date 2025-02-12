@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "@/redux/store";
-import { signupWithEmail, signupWithGoogle } from "@/features/auth/authSlice";
+import { listenForAuthChanges, signupWithEmail, signupWithGoogle } from "@/features/auth/authSlice";
 import { Toaster, toast } from "react-hot-toast";
 import Link from "next/link";
 import axios from "axios";
@@ -23,7 +23,6 @@ const SignupPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [avatarUrl, setAvatarUrl] = useState<string>("");
-
   const dispatch = useDispatch<AppDispatch>();
   const Router = useRouter();
   const firstNameRef = useRef<HTMLInputElement>(null);
@@ -41,18 +40,19 @@ const SignupPage: React.FC = () => {
     { ref: passwordRef, placeholder: "Password", name: "password", type: "password" },
     { ref: confirmPasswordRef, placeholder: "Confirm Password", name: "confirmPassword", type: "password" },
   ]);
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const session = false;
-      if (session) {
-        Router.push("/");
-      } else {
-        setIsSignedUp(true);
-      }
-    };
-    checkSession();
-  }, [Router]);
+       useEffect(() => {
+           dispatch(listenForAuthChanges());
+       }, [dispatch]);
+   
+       const user = useSelector((state: { auth: { user: any } }) => state.auth.user);
+       useEffect(() => {
+           console.log(user);
+           if (user) {
+               Router.push('/');
+           } else {
+               setIsSignedUp(true);
+           }
+       }, [ Router]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,7 +108,7 @@ const SignupPage: React.FC = () => {
       const res = await dispatch(signupWithEmail(userData));
       
       if (signupWithEmail.rejected.match(res)) {
-        toast.error(res.payload as string);
+        toast.error(res.payload as string, {duration:500});
       } else if (signupWithEmail.fulfilled.match(res)) {
         toast.success(`Welcome ${res.payload.email}`);
         Router.replace('/');

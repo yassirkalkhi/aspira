@@ -9,9 +9,10 @@ import { Skeleton } from '@/components/ui/shadcn/ui/skeleton';
 import PostJobSection from '@/components/ui/Jobs/PostJobModal';
 import ApplyModal from '@/components/ui/Jobs/ApplyModal';
 import MessagesList from '@/components/ui/Messages/MessagesList';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/redux/store';
 import { listenForAuthChanges } from '@/features/auth/authSlice';
+import toast from 'react-hot-toast';
 
 const Jobs = () => {
     
@@ -29,7 +30,6 @@ const Jobs = () => {
     const [jobType, setJobType] = useState('');
     const [salaryRange, setSalaryRange] = useState('');
     const [datePosted, setDatePosted] = useState('');
-    const [error, setError] = useState<string | null>(null);
     const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
     const [currentJobId, setCurrentJobId] = useState<string | null>(null);
 
@@ -61,7 +61,7 @@ const Jobs = () => {
             handleSearch(jobs); 
         } catch (err) {
             console.error('Error fetching jobs:', err);
-            setError('Failed to fetch jobs. Please try again later.');
+            toast.error('Failed to fetch jobs. Please try again later.');
         } finally {
             setIsLoading(false);
         }
@@ -131,17 +131,8 @@ const Jobs = () => {
     return (
         <div className="lg:h-[93.5vh] w-full  bg-dark-secondary  p-4 sm:p-6 lg:p-8 lg:fixed">
             <div className="max-w-7xl mx-auto space-y-6">
-                {/* Error Message */}
-                {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-                        {error}
-                        <button onClick={() => setError(null)} className="absolute top-0 right-0 px-4 py-3">
-                            ×
-                        </button>
-                    </div>
-                )}
-
-                     <ApplyModal  setIsApplicationModalOpen={setIsApplicationModalOpen} isApplicationModalOpen={isApplicationModalOpen} currentJobId={currentJobId} setError={setError}/>
+               
+                     <ApplyModal  setIsApplicationModalOpen={setIsApplicationModalOpen} isApplicationModalOpen={isApplicationModalOpen} currentJobId={currentJobId} />
 
                 {/* Main Grid Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

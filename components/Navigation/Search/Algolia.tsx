@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import instantsearch from 'instantsearch.js';
 import { searchBox, hits, configure, index } from 'instantsearch.js/es/widgets';
 import { Search } from 'lucide-react';
-import Link from "next/link"
 
 const searchClient = algoliasearch('A4L8O9LLGY', '0dc5543b7404eb77bc692b36f9c921b4');
 
@@ -89,8 +88,6 @@ const Algolia = () => {
         <div id="searchbox" className="relative">
           <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400 pointer-events-none" />
         </div>
-
-        {/* Always render containers but control visibility */}
         <div className={`absolute  -left-20 sm:left-0 top-14 mt-2 w-screen sm:w-full  rounded-lg shadow-xl z-50 overflow-hidden ${!query ? 'hidden' : ''}`}>
           <div className="bg-dark-primary p-2">
             <h3 className="text-white/80 text-sm font-semibold px-3 py-2">Users</h3>

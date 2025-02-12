@@ -1,5 +1,5 @@
 'use client'
-import { Bell, EllipsisVertical, User } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import MessagesList from '@/components/ui/Messages/MessagesList';
 import UserProfile from '@/components/ui/Profile/UserProfile';
@@ -21,12 +21,12 @@ interface Notification {
 
 const Notifications = () => { 
   const dispatch = useDispatch<AppDispatch>();
-  const user = useSelector((state: { auth: { user: any } }) => state.auth.user);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-
   useEffect(() => {
     dispatch(listenForAuthChanges());
   }, [dispatch]);
+  const user = useSelector((state: { auth: { user: any } }) => state.auth.user);
+
 
   useEffect(() => {
     if (!user?.uid) return;

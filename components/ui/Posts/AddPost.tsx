@@ -3,9 +3,11 @@ import { Image as ImageIcon, X } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, query, getDocs, where } from 'firebase/firestore';
 import axios from 'axios';
-import {  useSelector } from 'react-redux';
-import { checkSession } from '@/sessions/sessions';
+import {  useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
+import { listenForAuthChanges } from '@/features/auth/authSlice';
+import { AppDispatch } from '@/redux/store';
+import toast from 'react-hot-toast';
 
 const PostJob = () => {
     const [currentUser,setCurrentUser] = useState<any>(null);
@@ -13,15 +15,11 @@ const PostJob = () => {
     const [content, setContent] = useState('');
     const [files, setFiles] = useState<{ url: string; file: File }[]>([]);
     const [isPosting, setIsPosting] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const Router = useRouter();
-
-
-    
+    const dispatch = useDispatch<AppDispatch>()
     const { user } = useSelector((state: { auth: { user: any } }) => state.auth);
 
-  
 
 
     useEffect(()=>{
@@ -44,8 +42,6 @@ const PostJob = () => {
 },[user])
   
 
-  
-
     const handleFileSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = e.target.files ? Array.from(e.target.files) : [];
         if (files.length + selectedFiles.length > 5) {
@@ -66,14 +62,13 @@ const PostJob = () => {
 
     // Handle post submission
     const handlePost = async () => {
-          const session = await checkSession();
-                    if(!session){
+          dispatch(listenForAuthChanges());
+                    if(!user){
                         Router.push('/login')
                     }else{
                   
         if (!content.trim() && files.length === 0) return;
         setIsPosting(true);
-        setErrorMessage(null);
 
         try {
             const uploadedFiles = await Promise.all(
@@ -93,10 +88,10 @@ const PostJob = () => {
                     } catch (error) {
                         if (axios.isAxiosError(error)) {
                             console.error('Axios error:', error.response?.data);  
-                            setErrorMessage('Error uploading files');
+                            toast.error('Error uploading files');
                         } else {
                             console.error('Unknown error:', error);
-                            setErrorMessage('Error uploading files');
+                            toast.error('Error uploading files');
                         }
                     }
                 })
@@ -128,7 +123,7 @@ const PostJob = () => {
             setFiles([]);
             setIsExpanded(false);
         } catch (error) {
-            setErrorMessage('Error creating post. Please try again later.');
+            toast.error('Error creating post. Please try again later.');
             console.error('Error posting:', error);
         } finally {
             setIsPosting(false);
@@ -250,11 +245,7 @@ const PostJob = () => {
                         </div>
                     )}
                 </div>
-                {errorMessage && (
-                    <div className="mt-2 text-red-400">
-                        {errorMessage}
-                    </div>
-                )}
+            
             </div>
         </div>
     );

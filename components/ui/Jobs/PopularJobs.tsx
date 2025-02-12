@@ -1,13 +1,8 @@
 import { Briefcase, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { PopularJob } from "@/types/types";
 
 export const PopularJobs = ({ jobs } :{jobs : PopularJob[]}) => {
-    const navigate = useRouter();
-    const handleJobClick = (jobId : number) => {
-        navigate.push(`/jobs/${jobId}`);
-    };
 
     return (
       <div className="hidden lg:block space-y-6">
@@ -20,7 +15,6 @@ export const PopularJobs = ({ jobs } :{jobs : PopularJob[]}) => {
               {jobs.map((job) => (
                 <div 
                   key={job.id} 
-                  onClick={() => handleJobClick(job.id)}
                   className="mb-4 p-3 rounded-lg hover:bg-dark-secondary 
                           cursor-pointer transition-colors"
                 >
