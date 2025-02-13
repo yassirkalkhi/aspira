@@ -11,6 +11,7 @@ import { EventsHeader } from '@/components/ui/events/EventsHeader'
 import { CreateEventModal } from '@/components/ui/events/CreateEventModal'
 import toast from 'react-hot-toast'
 import axios from 'axios'
+import withAuth from '@/components/auth/withAuth'
 
 export interface Event {
   id: string
@@ -184,4 +185,4 @@ const EventsPage = () => {
   )
 }
 
-export default EventsPage
+export default withAuth(EventsPage)

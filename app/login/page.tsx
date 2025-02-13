@@ -29,7 +29,7 @@ const LoginPage: React.FC = () => {
         } else {
             setIslogged(true);
         }
-    }, [ Router]);
+    }, [user, Router]);
 
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -48,6 +48,7 @@ const LoginPage: React.FC = () => {
         const res = await dispatch(loginWithGoogle());
         if (loginWithGoogle.rejected.match(res)) {
             toast.error(res.payload as string);
+            Router.replace('/login');
         } else if (loginWithGoogle.fulfilled.match(res)) {
             toast.success(`Welcome back ${res.payload.email}`);
             Router.replace('/');

@@ -32,20 +32,22 @@ const ChatInterface = () => {
   const [showProfileSearch, setShowProfileSearch] = useState(false);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [avatars, setAvatars] = useState<{ [key: string]: string }>({}); 
+  const [avatars, setAvatars] = useState<{ [key: string]: string }>({});
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageContainerRef = useRef<HTMLDivElement>(null);
-   const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useDispatch<AppDispatch>();
+
   useEffect(() => {
-      dispatch(listenForAuthChanges());
-    }, [dispatch]);
-   const currentUser = useSelector((state: { auth: { user: any } }) => state.auth.user);
+    dispatch(listenForAuthChanges());
+  }, [dispatch]);
+
+  const currentUser = useSelector((state: { auth: { user: any } }) => state.auth.user);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Fetch messages for the opened conversation
   const fetchMessages = async (conversationId: string) => {
     try {
       const q = query(
@@ -57,7 +59,7 @@ const ChatInterface = () => {
       const unsubscribe = onSnapshot(
         q,
         (querySnapshot) => {
-          const fetchedMessages = querySnapshot.docs.map((doc) => ({  
+          const fetchedMessages = querySnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           })) as Message[];
@@ -77,7 +79,6 @@ const ChatInterface = () => {
     }
   };
 
-  // Fetch all conversations for the current user
   const fetchConversations = async () => {
     try {
       const q = query(
@@ -116,7 +117,6 @@ const ChatInterface = () => {
     }
   };
 
-  // Fetch the last message for a conversation
   const fetchLastMessage = async (conversationId: string) => {
     const q = query(
       collection(db, 'messages'),
@@ -129,7 +129,6 @@ const ChatInterface = () => {
     return querySnapshot.docs[0].data() as Message;
   };
 
-  // Fetch username for a participant
   const fetchUsername = async (participantId: string) => {
     const q = query(collection(db, 'profiles'), where('id', '==', participantId));
     const querySnapshot = await getDocs(q);
@@ -137,7 +136,6 @@ const ChatInterface = () => {
     return querySnapshot.docs[0].data().username;
   };
 
-  // Fetch avatars for all participants in conversations
   const fetchAvatarsForConversations = async (conversations: Conversation[]) => {
     const avatarMap: { [key: string]: string } = {};
 
@@ -153,7 +151,6 @@ const ChatInterface = () => {
     setAvatars(avatarMap);
   };
 
-  // Fetch user avatar
   const fetchUserAvatar = async (id: string) => {
     const q = query(collection(db, 'profiles'), where('id', '==', id));
     const querySnapshot = await getDocs(q);
@@ -161,7 +158,6 @@ const ChatInterface = () => {
     return querySnapshot.docs[0].data().avatar;
   };
 
-  // Fetch profiles based on search query
   const fetchProfiles = async (searchQuery: string) => {
     try {
       const profilesRef = collection(db, 'profiles');
@@ -179,7 +175,6 @@ const ChatInterface = () => {
     }
   };
 
-  // Create a new conversation
   const createConversation = async (participantId: string) => {
     try {
       const q = query(
@@ -211,7 +206,6 @@ const ChatInterface = () => {
     }
   };
 
-  // Get the receiver ID for the opened conversation
   const getReceiverId = async () => {
     if (!openedConversation) throw new Error('No conversation is opened');
     const docRef = doc(db, 'conversations', openedConversation);
@@ -220,52 +214,59 @@ const ChatInterface = () => {
     return data?.participants.find((participant: string) => participant !== currentUser?.uid);
   };
 
-  // Send a new message to the opened conversation
- const sendMessage = async () => {
-  if (newMessage.trim() === '' || !openedConversation) return;
-  const receiverId = await getReceiverId();
-  
-  try {
-    // Send the message
-    const messageRef = await addDoc(collection(db, 'messages'), {
-      senderId: currentUser.uid,
-      receiverId: receiverId,
-      content: newMessage,
-      timestamp: Timestamp.now(),
-      conversationId: openedConversation,
-    });
+  const sendMessage = async () => {
+    if (newMessage.trim() === '' || !openedConversation) return;
+    const receiverId = await getReceiverId();
+    setIsSending(true);
 
-    // Create notification
-    const senderName =  currentUser.email.split('@')[0] || 'Someone';
-    await addDoc(collection(db, 'notifications'), {
-      content: newMessage,
-      header: `New message from ${senderName}`,
-      receiveId: receiverId,
-      time: Timestamp.now(),
-      read: false,
-    });
+    try {
+      await addDoc(collection(db, 'messages'), {
+        senderId: currentUser.uid,
+        receiverId: receiverId,
+        content: newMessage,
+        timestamp: Timestamp.now(),
+        conversationId: openedConversation,
+      });
 
-    setNewMessage('');
-  } catch (err) {
-    console.error('Error sending message:', err);
-    toast.error(err instanceof Error ? err.message : 'An error occurred');
-  }
-};
+      const senderName = currentUser.email.split('@')[0] || 'Someone';
+      await addDoc(collection(db, 'notifications'), {
+        content: newMessage,
+        header: `New message from ${senderName}`,
+        receiveId: receiverId,
+        time: Timestamp.now(),
+        read: false,
+      });
 
-  // Fetch conversations when the component mounts
+      setNewMessage('');
+    } catch (err) {
+      console.error('Error sending message:', err);
+      toast.error(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   useEffect(() => {
     if (currentUser?.uid) {
       fetchConversations();
     }
   }, [currentUser?.uid]);
 
-    if (openedConversation && currentUser?.uid) fetchMessages(openedConversation);
+  useEffect(() => {
+    if (openedConversation && currentUser?.uid) {
+      let unsubscribe: (() => void) | undefined;
+      fetchMessages(openedConversation).then((unsub) => {
+        unsubscribe = unsub;
+      });
+      return () => unsubscribe?.();
+    }
+  }, [openedConversation, currentUser?.uid]);
+
   useEffect(() => {
     if (openedConversation) fetchMessages(openedConversation);
     else setMessages([]);
   }, [openedConversation]);
 
-  // Fetch profiles when the search query changes
   useEffect(() => {
     if (searchQuery.trim() !== '') fetchProfiles(searchQuery);
     else setProfiles([]);
@@ -368,16 +369,16 @@ const ChatInterface = () => {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 lg:p-6" ref={messageContainerRef}>
+        <div className="flex-1 overflow-y-auto p-4 lg:p-6 noScrollBar" ref={messageContainerRef}>
           <div className="space-y-4 max-w-3xl mx-auto">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${
-                  message.senderId === currentUser.uid ? 'justify-end' : 'justify-start'
+                  message.senderId === currentUser?.uid ? 'justify-end' : 'justify-start'
                 }`}
               >
-                {message.senderId !== currentUser.uid && (
+                {message.senderId !== currentUser?.uid && (
                   <div
                     className="w-8 h-8 rounded-full bg-gray-600 mr-2 flex-shrink-0 bg-cover"
                     style={{ backgroundImage: `url(${avatars[message.senderId]})` }}
@@ -411,6 +412,7 @@ const ChatInterface = () => {
               <button
                 onClick={sendMessage}
                 className="ml-2 p-3 bg-[#4B9B9B] text-white rounded-lg hover:bg-[#408B8B] flex-shrink-0"
+                disabled={isSending}
               >
                 <svg
                   className="w-5 h-5 rotate-90"

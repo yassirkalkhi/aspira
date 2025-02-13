@@ -52,7 +52,7 @@ const SignupPage: React.FC = () => {
            } else {
                setIsSignedUp(true);
            }
-       }, [ Router]);
+       }, [user, Router]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

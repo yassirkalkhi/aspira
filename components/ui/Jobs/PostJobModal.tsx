@@ -11,6 +11,7 @@ import InputField from "./FormParts/InputField";
 import Checkbox from "./FormParts/Checkbox";
 import TextArea from "./FormParts/Textarea";
 import toast from "react-hot-toast";
+import withAuth from "@/components/auth/withAuth";
 
 
 
@@ -319,7 +320,7 @@ const PostJobSection = () => {
 };
 
 
-export default PostJobSection;
+export default withAuth(PostJobSection);
 
 
 

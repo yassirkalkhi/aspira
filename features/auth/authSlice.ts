@@ -37,6 +37,8 @@ const getFirebaseErrorMessage = (error: any): string => {
           return "The email address is already in use by another account.";
         case "auth/weak-password":
           return "The password is too weak.";
+        case "auth/popup-blocked":
+          return "The popup was blocked by the browser.";
         default:
           return "An error occurred. Please try again.";
       }
@@ -150,6 +152,7 @@ export const loginWithGoogle = createAsyncThunk(
         username: user.displayName || user.email 
       };
     } catch (error: any) {
+      await signOut(auth);
       return rejectWithValue(getFirebaseErrorMessage(error)); 
     }
   }
@@ -241,6 +244,7 @@ export const signupWithGoogle = createAsyncThunk(
 
     } catch (error: any) {
       await signOut(auth);
+      console.log(error)
       return rejectWithValue(getFirebaseErrorMessage(error)); 
     }
   }

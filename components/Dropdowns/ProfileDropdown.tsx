@@ -23,7 +23,7 @@ const ProfileDropdown = () => {
     const handleSignOut = () => {
       toast('Logging out...');
       dispatch(logoutUser())
-      Router.push('./login')
+      Router.replace('./login')
       
     };
 
