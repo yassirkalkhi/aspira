@@ -22,7 +22,7 @@ import { auth } from "@/lib/firebase";
 
 
 
-const page = () => {
+const RecruiterDashboard = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const [activeTab, setActiveTab] = useState("users");
@@ -616,4 +616,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default RecruiterDashboard;
