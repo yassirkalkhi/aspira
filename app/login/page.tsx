@@ -12,7 +12,7 @@ import Link from 'next/link';
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-    const [remeberMe, setRemeberMe] = useState<boolean>(false);
+    const [rememberMe, setRememberMe] = useState<boolean>(false);
     const [isLogged,setIslogged] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
     const Router = useRouter();
@@ -34,7 +34,7 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const res = await dispatch(loginUser({ email, password,remeberMe }));
+        const res = await dispatch(loginUser({ email, password,rememberMe }));
         if (loginUser.rejected.match(res)) {
             toast.error(res.payload as string);
         } else if (loginUser.fulfilled.match(res)) {
@@ -75,7 +75,7 @@ const LoginPage: React.FC = () => {
                     </div>
                     <div className='flex justify-between items-center mb-8'>
                        <div className='flex  gap-3'>
-                         <input type="checkbox" onChange={(e) =>  setRemeberMe(!remeberMe)} />
+                         <input type="checkbox" onChange={(e) =>  setRememberMe(!rememberMe)} />
                          <label className='text-white/80 text-[0.9rem]' >Remember me </label>
                         </div>
                         <span className='text-theme-primary underline text-sm'>Forgot password</span>

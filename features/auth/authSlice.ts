@@ -48,9 +48,9 @@ const getFirebaseErrorMessage = (error: any): string => {
    
   };
 
-export const loginUser = createAsyncThunk("auth/loginUser", async ({ email, password,remeberMe }:{email : string , password : string,remeberMe : Boolean}, { rejectWithValue }) => {
+export const loginUser = createAsyncThunk("auth/loginUser", async ({ email, password,rememberMe }:{email : string , password : string,rememberMe : Boolean}, { rejectWithValue }) => {
   try {
-    if(remeberMe){
+    if(rememberMe){
       createSession();
     }
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -310,8 +310,19 @@ const authSlice = createSlice({
 export const { setUser } = authSlice.actions;
 export default authSlice.reducer;
 
-export const listenForAuthChanges = () => (dispatch: (arg0: { payload: any; type: "auth/setUser"; }) => void) => {
-  onAuthStateChanged(auth, (user) => {
-    dispatch(setUser(user ? { uid: user.uid, email: user.email } : null));
+export const listenForAuthChanges = () => async (dispatch: (arg0: { payload: any; type: "auth/setUser"; }) => void) => {
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnapshot = await getDoc(userDocRef);
+      if (userDocSnapshot.exists()) {
+        const userData = userDocSnapshot.data();
+        dispatch(setUser({ uid: user.uid, email: user.email, role: userData?.role || "user" }));
+      } else {
+        dispatch(setUser({ uid: user.uid, email: user.email, role: "user" }));
+      }
+    } else {
+      dispatch(setUser(null));
+    }
   });
 };
