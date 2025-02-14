@@ -102,7 +102,7 @@ const PostsList = () => {
                         {/* Author Info */}
                         <div className="flex items-start gap-3 mb-4">
                             <img
-                                src={post.author.avatar}
+                                src={post.author.avatar || 'https://placehold.co/600x400?text=Hello\nWorld'}
                                 alt={post.author.name}
                                 className="h-10 w-10 rounded-full object-cover"
                             />

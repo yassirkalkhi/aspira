@@ -82,9 +82,9 @@ const MessagesList = () => {
           key={message.id}
           onClick={() => router.push('/messages')}
           className="flex items-center gap-3 mb-4 cursor-pointer hover:bg-dark-secondary p-2 rounded-lg transition-colors"
-        >
+        >     
           <div className="relative">
-            <div className="h-8 w-8 rounded-full object-cover bg-center bg-cover" style={{backgroundImage: `url(${message.senderAvatar || "https://lh3.googleusercontent.com/a/ACg8ocLq2rzclet439QDaQyxEMOibEjv8Govpm4EPsbgqDaFxHOpIg=s96-c"})`}}></div>
+            <div className="h-8 w-8 rounded-full object-cover bg-center bg-cover" style={{backgroundImage: `url(${message.senderAvatar || "https://placehold.co/600x400?text=Hello\nWorld"})`}}></div>
             <span className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ${message.senderIsOnline ? 'bg-[#238636]' : 'bg-gray-500'}`} />
           </div>
           <div className="flex-1 min-w-0">

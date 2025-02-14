@@ -74,6 +74,9 @@ const ProfileDropdown = () => {
       <li>
         <Link href="/profile" className="block px-4 py-2 hover:bg-gray-600 hover:text-white">Settings</Link>
       </li>
+      <li>
+        <Link href="/console/recruiter" className="block px-4 py-2 hover:bg-gray-600 hover:text-white"> Dashboard</Link>
+      </li>
     </ul>
     <div className="py-2">
       <button onClick={handleSignOut} className="block px-4 py-2 text-sm w-full text-start  hover:bg-red-500 text-gray-200 hover:text-white">Sign out</button>
